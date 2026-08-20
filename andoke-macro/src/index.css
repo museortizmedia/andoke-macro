@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fuentes personalizadas */
+  --font-display-xl: "Space Grotesk", sans-serif;
+  --font-headline-lg: "Space Grotesk", sans-serif;
+  --font-headline-md: "Space Grotesk", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-code-sm: "JetBrains Mono", monospace;
+  --font-label-caps: "JetBrains Mono", monospace;
+
+  /* Colores del diseño original */
+  --color-surface: #fcf8fa;
+  --color-on-surface: #1b1b1d;
+  --color-on-surface-variant: #45464d;
+  --color-tertiary: #000000;
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-surface-container-low: #f6f3f5;
+  --color-surface-container-high: #eae7e9;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline-variant: #c6c6cd;
+}
+
+/* Ocultar barra de scroll en Firefox, IE/Edge y Chrome/Safari */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE y Edge */
+  scrollbar-width: none;  /* Firefox */
+}
