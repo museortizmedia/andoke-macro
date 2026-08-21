@@ -19,13 +19,13 @@ export default function AndokeWelcome({ onNavigate }) {
 
       <main className="w-full max-w-2xl flex flex-col pt-8 pb-8 px-6">
         {/* Header: Logo */}
-<header className="w-full flex justify-center items-center mb-8">
-  <img 
-    src="/horizontal.webp" 
-    alt="Andoke Logo" 
-    className="h-16 w-auto object-contain" 
-  />
-</header>
+        <header className="w-full flex justify-center items-center mb-8">
+          <img
+            src="./horizontal.webp"
+            alt="Andoke Logo"
+            className="h-16 w-auto object-contain"
+          />
+        </header>
 
         {/* Hero Section */}
         <section className="mb-12">
@@ -114,7 +114,7 @@ export default function AndokeWelcome({ onNavigate }) {
 
         {/* Botón CTA con evento onNavigate */}
         <section className="mt-auto pb-16 w-full flex justify-center">
-          <button 
+          <button
             onClick={() => onNavigate && onNavigate('mapa')}
             className="w-full bg-[#e63946] text-white font-bold text-sm py-4 px-8 rounded-full shadow-[0_4px_20px_rgba(230,57,70,0.4)] hover:-translate-y-1 hover:shadow-[0_6px_25px_rgba(230,57,70,0.5)] transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
           >
