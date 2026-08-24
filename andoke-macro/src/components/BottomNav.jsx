@@ -4,19 +4,20 @@ export const BottomNav = ({ activeTab, onNavigate }) => {
   const navItems = [
     { key: 'inicio', label: 'Inicio', icon: 'home' },
     { key: 'mapa', label: 'Mapa', icon: 'map' },
+    { key: 'camara', label: 'Escanear', icon: 'camera' },
     { key: 'estaciones', label: 'Estaciones', icon: 'eco' },
     { key: 'info', label: 'Info', icon: 'info' }
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 px-4 py-2 flex justify-around items-center shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 px-2 py-2 flex justify-between items-center shadow-lg">
       {navItems.map((item) => {
         const isActive = activeTab === item.key;
         return (
           <button
             key={item.key}
             onClick={() => onNavigate(item.key)}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-colors ${
+            className={`flex-1 flex flex-col items-center justify-center py-1 rounded-lg transition-colors ${
               isActive ? 'text-emerald-700 font-bold' : 'text-gray-500 hover:text-gray-900'
             }`}
           >

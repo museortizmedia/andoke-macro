@@ -1,17 +1,24 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { parkStorageService } from "../services/parkStorageService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    () => localStorage.getItem('isAdminAuth') === 'true'
+    () => localStorage.getItem("isAdminAuth") === "true"
   );
 
+  const [visitorSession, setVisitorSession] = useState(null);
+
+  useEffect(() => {
+    const session = parkStorageService.getSession();
+    if (session) setVisitorSession(session);
+  }, []);
+
   const login = (credentials) => {
-    // Ejemplo de validación básica (reemplazar por llamadas a API/Intranet)
-    if (credentials.username === 'admin' && credentials.password === 'andoke2026') {
+    if (credentials.username === "admin" && credentials.password === "andoke2026") {
       setIsAuthenticated(true);
-      localStorage.setItem('isAdminAuth', 'true');
+      localStorage.setItem("isAdminAuth", "true");
       return true;
     }
     return false;
@@ -19,11 +26,23 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('isAdminAuth');
+    localStorage.removeItem("isAdminAuth");
+  };
+
+  const updateVisitorSession = (sessionData) => {
+    setVisitorSession(sessionData);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        login,
+        logout,
+        visitorSession,
+        updateVisitorSession,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

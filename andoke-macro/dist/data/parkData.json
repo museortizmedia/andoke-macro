@@ -1,0 +1,171 @@
+{
+  "POIS": [
+    {
+      "id": "domo",
+      "name": "Domo (Mariposario)",
+      "duration": 30,
+      "zone": "Zona Norte",
+      "description": "Santuario de mariposas en vuelo libre y conservación de especies.",
+      "selectable": true,
+      "icon": "flutter_dash",
+      "mapCoords": {
+        "top": "25%",
+        "left": "60%"
+      }
+    },
+    {
+      "id": "laboratorio",
+      "name": "Laboratorio",
+      "duration": 20,
+      "zone": "Centro de Investigación",
+      "description": "Observación del ciclo de vida, metamorfosis y eclosión.",
+      "selectable": true,
+      "icon": "science",
+      "mapCoords": {
+        "top": "35%",
+        "left": "45%"
+      }
+    },
+    {
+      "id": "mapa_colombia",
+      "name": "Mapa de Colombia",
+      "duration": 25,
+      "zone": "Zona Sur",
+      "description": "Instalación topográfica a escala para explorar las regiones del país.",
+      "selectable": true,
+      "icon": "map",
+      "mapCoords": {
+        "top": "65%",
+        "left": "50%"
+      }
+    },
+    {
+      "id": "cabanas",
+      "name": "Cabañas",
+      "duration": 20,
+      "zone": "Zona de Hospedaje",
+      "description": "Área de alojamiento e inmersión en la naturaleza.",
+      "selectable": true,
+      "icon": "cabin",
+      "mapCoords": {
+        "top": "45%",
+        "left": "75%"
+      }
+    },
+    {
+      "id": "recepcion_tienda",
+      "name": "Recepción y Tienda de Recuerdos",
+      "duration": 15,
+      "zone": "Entrada Principal",
+      "description": "Punto de bienvenida, información y souvenir ecológicos.",
+      "selectable": true,
+      "icon": "storefront",
+      "mapCoords": {
+        "top": "80%",
+        "left": "30%"
+      }
+    },
+    {
+      "id": "estacionamiento",
+      "name": "Estacionamiento",
+      "duration": 0,
+      "zone": "Entrada",
+      "description": "Parqueadero general para vehículos.",
+      "selectable": false,
+      "icon": "local_parking",
+      "mapCoords": {
+        "top": "90%",
+        "left": "15%"
+      }
+    },
+    {
+      "id": "banos",
+      "name": "Baños",
+      "duration": 0,
+      "zone": "Zona Central",
+      "description": "Servicios sanitarios.",
+      "selectable": false,
+      "icon": "wc",
+      "mapCoords": {
+        "top": "60%",
+        "left": "40%"
+      }
+    },
+    {
+      "id": "cafeteria",
+      "name": "Cafetería",
+      "duration": 0,
+      "zone": "Zona Central",
+      "description": "Estación de bebidas, snacks y descanso.",
+      "selectable": false,
+      "icon": "restaurant",
+      "mapCoords": {
+        "top": "55%",
+        "left": "65%"
+      }
+    },
+    {
+      "id": "auditorio",
+      "name": "Auditorio",
+      "duration": 0,
+      "zone": "Centro Pedagógico",
+      "description": "Espacio para charlas, conferencias y proyecciones.",
+      "selectable": false,
+      "icon": "groups",
+      "mapCoords": {
+        "top": "40%",
+        "left": "35%"
+      }
+    }
+  ],
+  "STATIONS": [
+    {
+      "id": "EST-001",
+      "numeroConsecutivo": 1,
+      "poiId": "recepcion_tienda",
+      "title": "¡Bienvenida!",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-001/",
+      "order": ["gallery", "text", "video", "audio"]
+    }
+  ],
+  "PREDEFINED_ROUTES": [
+    {
+      "id": "completa",
+      "title": "Ruta Completa (Todas)",
+      "icon": "route",
+      "pois": [
+        "mapa_colombia",
+        "laboratorio",
+        "domo",
+        "cabanas",
+        "recepcion_tienda"
+      ],
+      "bgActive": "bg-[#4ea8de] text-white shadow-sm",
+      "bgInactive": "bg-[#4ea8de]/15 border border-[#4ea8de]/30 text-[#4ea8de]"
+    },
+    {
+      "id": "aprendizaje",
+      "title": "Ruta Aprendizaje",
+      "icon": "school",
+      "pois": [
+        "mapa_colombia",
+        "laboratorio",
+        "domo"
+      ],
+      "bgActive": "bg-[#52b788] text-[#ffffff] shadow-sm",
+      "bgInactive": "bg-[#52b788]/15 border border-[#52b788]/30 text-[#52b788]"
+    },
+    {
+      "id": "romantica",
+      "title": "Ruta Romántica",
+      "icon": "favorite",
+      "pois": [
+        "domo",
+        "mapa_colombia"
+      ],
+      "bgActive": "bg-[#e63946] text-white shadow-sm vibrant-glow-primary",
+      "bgInactive": "bg-[#e63946]/15 border border-[#e63946]/30 text-[#e63946]"
+    }
+  ]
+}

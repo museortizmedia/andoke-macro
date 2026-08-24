@@ -1,127 +1,172 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 export default function AndokeWelcome({ onNavigate }) {
-  const [expressMode, setExpressMode] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  // URLs estables con fallback automático en caso de fallo de red
+  const [heroImg, setHeroImg] = useState(
+    "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop"
+  );
+  const [videoSrc, setVideoSrc] = useState(
+    "https://cdn.jsdelivr.net/npm/video-media-samples/big-buck-bunny-1080p-60fps-30sec.mp4"
+  );
+
+  const handleGoToMap = () => {
+    if (onNavigate) {
+      onNavigate("mapa");
+    }
+  };
 
   return (
-    <div className="bg-[#fcfdfd] text-[#767775] font-sans min-h-screen flex flex-col items-center overflow-x-hidden">
+    <div className="bg-[#fcfdfd] text-[#767775] font-['Manrope',sans-serif] antialiased min-h-screen w-full flex flex-col justify-between">
       <style>{`
-        .nature-shadow {
-          box-shadow: 0 8px 30px rgba(27, 67, 50, 0.08);
-        }
-        .interactive-card {
-          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        .interactive-card:hover {
-          transform: translateY(-4px);
+        .vibrant-glow-primary {
+          box-shadow: 0 4px 20px -2px rgba(230, 57, 70, 0.35);
         }
       `}</style>
 
-      <main className="w-full max-w-2xl flex flex-col pt-8 pb-8 px-6">
-        {/* Header: Logo */}
-        <header className="w-full flex justify-center items-center mb-8">
+      <main className="w-full max-w-xl mx-auto flex flex-col items-center pt-8 pb-12 px-6 flex-1 justify-center">
+        {/* Header Logo */}
+        <header className="w-full flex justify-center items-center mb-6">
           <img
             src="./horizontal.webp"
             alt="Andoke Logo"
-            className="h-16 w-auto object-contain"
+            className="h-14 w-auto object-contain"
+            onError={(e) => {
+              // Si no encuentra la imagen local del logo, muestra texto estilizado sin romperse
+              e.currentTarget.style.display = "none";
+            }}
           />
         </header>
 
-        {/* Hero Section */}
-        <section className="mb-12">
-          <div className="relative w-full aspect-[4/3] rounded-t-[2rem] rounded-b-xl overflow-hidden nature-shadow border border-gray-200 group cursor-pointer">
-            <img
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              alt="Jardín botánico Andoke"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLsKdYkdWS8Dhj0r25WNQTK9K5-HrYvGJgm5O4Q-Hah-_azCK4rYDlVg6UOm9MA_0buj9hvdCKqYuOhORsx-tLv5p4tB_r5ANTsjr9Q8RiLD-se6Y56HEydVDw8qnMEM4Dsb0vtXnovYoCn_RR-PWCRC0QP4tgIZOtyQ9jIL_k2LA4o_9yGFNPFn5WYOXP-Tlw9Kiaedy6m1cfVl7Eul-UvuIdSr92xIUW148KIDjnncXXaf_flpv90A"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#e63946]/80 via-[#e63946]/20 to-transparent flex items-end p-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-md">
-                Welcome to the Park
-              </h2>
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 text-white transition-transform group-hover:scale-110">
+        {/* Hero Video Banner / Card */}
+        <div
+          onClick={() => setIsVideoOpen(true)}
+          className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-sm border border-[#e4bebc]/20 mb-8 cursor-pointer group bg-slate-900"
+        >
+          <img
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            alt="Parque Andoke"
+            src={heroImg}
+            onError={() => {
+              // Fallback si la imagen de Unsplash falla
+              setHeroImg(
+                "https://picsum.photos/id/1018/1200/675"
+              );
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent flex flex-col justify-between p-6">
+            <div className="flex justify-end">
+              <div className="w-12 h-12 rounded-full bg-[#e63946] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span
-                  className="material-symbols-outlined text-4xl"
+                  className="material-symbols-outlined text-2xl"
                   style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   play_arrow
                 </span>
               </div>
             </div>
+            <div>
+              <span className="text-[#4ea8de] text-xs font-bold uppercase tracking-wider mb-1 block">
+                Guía Interactiva • Video de Bienvenida
+              </span>
+              <h1 className="text-2xl font-extrabold text-white leading-tight">
+                ¡Bienvenido a Andoke!
+              </h1>
+            </div>
           </div>
-        </section>
+        </div>
 
-        {/* Sección: Cómo interactuar */}
-        <section className="mb-8 flex flex-col gap-4">
-          <h3 className="text-xl font-semibold text-[#e63946]">
-            Cómo Interactuar
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="interactive-card bg-white p-4 rounded-t-xl rounded-b-lg border border-gray-200/60 nature-shadow flex flex-col items-center text-center gap-2">
-              <div className="w-16 h-16 rounded-full bg-[#4ea8de] text-white flex items-center justify-center mb-2">
-                <span className="material-symbols-outlined text-3xl">
+        {/* Modal de Video Player */}
+        {isVideoOpen && (
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="relative w-full max-w-3xl bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-[16/9] flex items-center justify-center">
+              {/* Botón Cerrar */}
+              <button
+                onClick={() => setIsVideoOpen(false)}
+                className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/90 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+
+              {/* Reproductor de Video con fallback */}
+              <video
+                key={videoSrc}
+                className="w-full h-full object-contain"
+                controls
+                autoPlay
+                playsInline
+                src={videoSrc}
+                onError={() => {
+                  // Si jsDelivr falla, cambia a CDN alternativo de prueba
+                  setVideoSrc(
+                    "https://www.w3schools.com/html/mov_bbb.mp4"
+                  );
+                }}
+              >
+                Tu navegador no soporta la reproducción de video.
+              </video>
+            </div>
+          </div>
+        )}
+
+        {/* Instrucciones de Uso */}
+        <section className="w-full mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-[#767775]">
+              ¿Cómo interactuar en el parque?
+            </h2>
+            <p className="text-xs text-[#767775]/80 mt-1">
+              En cada estación encontrarás placas interactivas. Usa tu teléfono
+              directamente sin instalar aplicaciones.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            {/* Opción NFC */}
+            <div className="bg-white p-5 rounded-2xl border border-[#e4bebc]/30 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-[#4ea8de]/15 text-[#4ea8de] flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-2xl">
                   contactless
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-[#e63946] tracking-wider">
-                NFC
-              </h4>
-              <p className="text-sm text-[#767775]">
-                Acerca el reverso de tu celular a la placa de madera.
+              <h3 className="font-bold text-sm text-[#767775] mb-1">
+                1. Tecnología NFC
+              </h3>
+              <p className="text-xs text-[#767775]/80 leading-relaxed">
+                Acerca la parte trasera de tu celular a la placa de madera para
+                abrir el contenido interactivo.
               </p>
             </div>
 
-            <div className="interactive-card bg-white p-4 rounded-t-xl rounded-b-lg border border-gray-200/60 nature-shadow flex flex-col items-center text-center gap-2">
-              <div className="w-16 h-16 rounded-full bg-[#52b788] text-white flex items-center justify-center mb-2">
-                <span className="material-symbols-outlined text-3xl">
+            {/* Opción QR */}
+            <div className="bg-white p-5 rounded-2xl border border-[#e4bebc]/30 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-[#52b788]/15 text-[#52b788] flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-2xl">
                   qr_code_scanner
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-[#e63946] tracking-wider">
-                QR
-              </h4>
-              <p className="text-sm text-[#767775]">
-                Abre la cámara y escanea el código QR.
+              <h3 className="font-bold text-sm text-[#767775] mb-1">
+                2. Código QR
+              </h3>
+              <p className="text-xs text-[#767775]/80 leading-relaxed">
+                Abre la cámara de tu celular, apunta al código de la estación y
+                toca el enlace desplegado.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Modo Express */}
-        <section className="mb-12">
-          <div className="bg-[#f4f4f1] rounded-xl p-4 flex items-center justify-between border border-gray-300/50">
-            <div className="flex flex-col pr-4">
-              <span className="font-bold text-sm text-[#e63946] tracking-wider">
-                Modo Express
-              </span>
-              <span className="text-xs text-[#767775] mt-1">
-                Reducir intervenciones para agilizar tiempo
-              </span>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={expressMode}
-                onChange={(e) => setExpressMode(e.target.checked)}
-              />
-              <div className="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#e63946]"></div>
-            </label>
-          </div>
-        </section>
-
-        {/* Botón CTA con evento onNavigate */}
-        <section className="mt-auto pb-16 w-full flex justify-center">
+        {/* CTA Directo al Mapa */}
+        <div className="w-full">
           <button
-            onClick={() => onNavigate && onNavigate('mapa')}
-            className="w-full bg-[#e63946] text-white font-bold text-sm py-4 px-8 rounded-full shadow-[0_4px_20px_rgba(230,57,70,0.4)] hover:-translate-y-1 hover:shadow-[0_6px_25px_rgba(230,57,70,0.5)] transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+            onClick={handleGoToMap}
+            className="w-full mb-16 bg-[#e63946] text-white font-bold text-base py-4 px-8 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Continuar al Mapa de Rutas
-            <span className="material-symbols-outlined">map</span>
+            <span className="material-symbols-outlined text-xl">map</span>
+            Explorar el Mapa e Iniciar
           </button>
-        </section>
+        </div>
       </main>
     </div>
   );
