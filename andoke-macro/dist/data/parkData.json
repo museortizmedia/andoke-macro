@@ -7,7 +7,7 @@
       "zone": "Zona Norte",
       "description": "Santuario de mariposas en vuelo libre y conservación de especies.",
       "selectable": true,
-      "icon": "flutter_dash",
+      "icon": "emoji_nature",
       "mapCoords": {
         "top": "25%",
         "left": "60%"
