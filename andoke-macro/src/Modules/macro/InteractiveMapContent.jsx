@@ -12,6 +12,8 @@ const DEFAULT_CENTER_COORDS = [
   { top: "38%", left: "38%" }
 ];
 
+const SELECTED_ROUTE_CACHE_KEY = 'user_selected_route';
+
 export const InteractiveMapContent = () => {
   const [extendedPois, setExtendedPois] = useState([]);
   const [routesConfig, setRoutesConfig] = useState([]);
@@ -49,19 +51,49 @@ export const InteractiveMapContent = () => {
           pois: route.pois || pois.filter((p) => p.selectable).map((p) => p.id)
         }));
 
+        // Al mapear las rutas e hidratar el estado inicial en el fetch:
         setExtendedPois(pois);
         setRoutesConfig(routes);
 
-        // Establece la ruta seleccionada inicial
+        // Intentar cargar la selección del usuario previa desde localStorage
+        const savedRouteRaw = localStorage.getItem(SELECTED_ROUTE_CACHE_KEY);
+        if (savedRouteRaw) {
+          try {
+            const parsedSavedRoute = JSON.parse(savedRouteRaw);
+            if (Array.isArray(parsedSavedRoute) && parsedSavedRoute.length > 0) {
+              setSelectedStationIds(parsedSavedRoute);
+              setActiveRouteFilter("custom");
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error("Error leyendo ruta guardada:", e);
+          }
+        }
+
+        // Fallback: si no hay nada guardado, cargar la ruta inicial "completa"
         const initialRoute = routes.find((r) => r.id === "completa")?.pois || [];
         setSelectedStationIds(initialRoute);
         setIsLoading(false);
+
       })
       .catch((err) => {
         console.error("Error cargando los datos del parque:", err);
         setIsLoading(false);
       });
   }, []);
+
+  // Guardar ruta sin boton guardar
+  useEffect(() => {
+    if (!isLoading && selectedStationIds.length > 0) {
+      localStorage.setItem(SELECTED_ROUTE_CACHE_KEY, JSON.stringify(selectedStationIds));
+    }
+  }, [selectedStationIds, isLoading]);
+
+  const handleSaveAndStartRoute = () => {
+    // Guardar en localStorage
+    localStorage.setItem(SELECTED_ROUTE_CACHE_KEY, JSON.stringify(selectedStationIds));
+  };
 
   const toggleStation = (id) => {
     const station = extendedPois.find((s) => s.id === id);
@@ -152,7 +184,7 @@ export const InteractiveMapContent = () => {
       <main className="flex-1 w-full max-w-7xl mx-auto md:px-12 md:py-8 flex flex-col md:flex-row gap-8">
         {/* Columna Izquierda: Mapa e Interacciones */}
         <div className="w-full md:w-2/3 flex flex-col gap-4 relative">
-          
+
           {/* Buscador Desktop */}
           <div className="hidden md:block relative w-full mb-2">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#767775]">
@@ -176,7 +208,7 @@ export const InteractiveMapContent = () => {
                   "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjGbfOqiQM6wmgXWGOlNaF03MKSKi2H-0N_0SaoP06w9qtgalPr_u30QycCvB0JZC83eplydWmWrRvmws8JMFMLVUtgxAfGuoq9GtB96_WIW1ZnqoMEWowpyIYyKv8TI16aUSpft77EiElVs6CkO873DdF2Qm2JixV7zI2IvTvyUWkGaaDt4ETzrClzf9csQTR_CH-3hyQOUFgiqVSLVRK4w1B_HGgVnBjWVFg8y5Vdwt2F6dGqGCMzA')"
               }}
             />
-            
+
             {/* Markers en el mapa */}
             <div className="absolute inset-0 p-4 pointer-events-none">
               {extendedPois.map((station) => {
@@ -189,29 +221,26 @@ export const InteractiveMapContent = () => {
                     onClick={() => isSelectable && toggleStation(station.id)}
                     style={{ top: station.top, left: station.left }}
                     disabled={!isSelectable}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto transition-transform ${
-                      isSelectable ? "cursor-pointer hover:scale-110" : "cursor-default opacity-85"
-                    }`}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto transition-transform ${isSelectable ? "cursor-pointer hover:scale-110" : "cursor-default opacity-85"
+                      }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${
-                        !isSelectable
-                          ? "bg-slate-500 text-white"
-                          : isSelected
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${!isSelectable
+                        ? "bg-slate-500 text-white"
+                        : isSelected
                           ? "bg-[#e63946] text-white vibrant-glow-primary scale-110 z-10"
                           : "bg-gray-300 text-gray-600 opacity-60"
-                      }`}
+                        }`}
                     >
                       <span className="material-symbols-outlined text-sm">{station.icon}</span>
                     </div>
                     <span
-                      className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm whitespace-nowrap ${
-                        !isSelectable
-                          ? "bg-slate-100 text-slate-700 border border-slate-200"
-                          : isSelected
+                      className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold shadow-sm whitespace-nowrap ${!isSelectable
+                        ? "bg-slate-100 text-slate-700 border border-slate-200"
+                        : isSelected
                           ? "bg-white/95 text-[#767775]"
                           : "bg-gray-200/90 text-gray-500"
-                      }`}
+                        }`}
                     >
                       {station.name}
                     </span>
@@ -233,9 +262,8 @@ export const InteractiveMapContent = () => {
                   <button
                     key={route.id}
                     onClick={() => applyRoute(route.id)}
-                    className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-all cursor-pointer ${
-                      isActive ? route.bgActive : route.bgInactive
-                    }`}
+                    className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-all cursor-pointer ${isActive ? route.bgActive : route.bgInactive
+                      }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">{route.icon}</span>
                     {route.title}
@@ -267,26 +295,24 @@ export const InteractiveMapContent = () => {
                   <div
                     key={station.id}
                     onClick={() => toggleStation(station.id)}
-                    className={`border rounded-[16px] p-4 transition-all cursor-pointer relative overflow-hidden ${
-                      isSelected
-                        ? "bg-white border-[#e4bebc]/40 shadow-sm"
-                        : "bg-gray-50/70 border-gray-200/60 opacity-60"
-                    }`}
+                    className={`border rounded-[16px] p-4 transition-all cursor-pointer relative overflow-hidden ${isSelected
+                      ? "bg-white border-[#e4bebc]/40 shadow-sm"
+                      : "bg-gray-50/70 border-gray-200/60 opacity-60"
+                      }`}
                   >
                     <div
-                      className={`absolute left-0 top-0 bottom-0 w-1.5 ${
-                        isSelected ? "bg-[#e63946]" : "bg-gray-300"
-                      }`}
+                      className={`absolute left-0 top-0 bottom-0 w-1.5 ${isSelected ? "bg-[#e63946]" : "bg-gray-300"
+                        }`}
                     />
 
                     <div className="flex justify-between items-start mb-1 pl-1">
                       <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg text-[#767775]">
+                        <span className="material-symbols-outlined text-lg text-[#767775] flex-shrink-0">
                           {station.icon}
                         </span>
-                        <div>
-                          <h3 className="text-base font-bold text-[#767775]">{station.name}</h3>
-                          <span className="text-[10px] text-gray-400 font-semibold">{station.zone}</span>
+                        <div className="flex flex-col justify-center leading-tight">
+                          <h3 className="text-base font-bold text-[#767775] leading-none mb-0.5">{station.name}</h3>
+                          <span className="text-[10px] text-gray-400 font-semibold leading-none">{station.zone}</span>
                         </div>
                       </div>
                       <button className="text-[#e63946]">
@@ -321,7 +347,10 @@ export const InteractiveMapContent = () => {
 
           {/* CTA Desktop */}
           <div className="mb-16 hidden md:block mt-auto pt-4 border-t border-[#e2e3df]/30">
-            <button className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <button
+              onClick={handleSaveAndStartRoute}
+              className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
               <span className="material-symbols-outlined text-[20px]">directions_walk</span>
               Guardar mi Recorrido ({formattedTime()})
             </button>
@@ -331,7 +360,10 @@ export const InteractiveMapContent = () => {
 
       {/* CTA Móvil */}
       <div className="mb-16 md:hidden fixed bottom-6 left-4 right-4 z-40">
-        <button className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer">
+        <button
+          onClick={handleSaveAndStartRoute}
+          className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer"
+        >
           <span className="material-symbols-outlined text-[20px]">directions_walk</span>
           Guardar mi Recorrido ({formattedTime()})
         </button>

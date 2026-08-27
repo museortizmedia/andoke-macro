@@ -2,9 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
 
 const CACHE_KEY = 'visited_stations_cache';
+const ROUTE_KEY = 'user_selected_route';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-// --- FUNCIONES AUXILIARES DE CACHÉ Y VALIDACIÓN ---
+// --- FUNCIONES AUXILIARES DE CACHÉ Y RUTA ---
+
+const getUserSelectedPoiIds = () => {
+  try {
+    const raw = localStorage.getItem(ROUTE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+};
 
 const getValidVisitedStations = () => {
   try {
@@ -47,7 +59,7 @@ const checkResourceExists = async (url, expectedType = 'image') => {
 
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      return false; // Evita el fallback a index.html en Vite
+      return false;
     }
 
     if (expectedType === 'image') {
@@ -81,9 +93,16 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const [totalStations, setTotalStations] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(1);
   const [visitedStations, setVisitedStations] = useState([]);
+  
+  // Control de desviación de ruta
+  const [showDeviationModal, setShowDeviationModal] = useState(false);
+
+  // Guardamos POIS y STATIONS globales
+  const [allPois, setAllPois] = useState([]);
+  const [allStations, setAllStations] = useState([]);
   const [orderedBlocks, setOrderedBlocks] = useState([]);
 
-  // --- ESTADOS Y REFERENCIAS PARA WEB AUDIO API ---
+  // Estados para Web Audio API
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const audioContextRef = useRef(null);
@@ -105,7 +124,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     setVisitedStations(getValidVisitedStations());
   }, [activeStationId]);
 
-  // Limpiar reproductor al cambiar de estación o desmontar
   useEffect(() => {
     stopAudio();
     audioBufferRef.current = null;
@@ -122,11 +140,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   }, []);
 
   useEffect(() => {
-    if (!activeStationId) {
-      setLoading(false);
-      return;
-    }
-
     async function loadStationInfo() {
       try {
         setLoading(true);
@@ -134,25 +147,54 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         const res = await fetch('/data/parkData.json');
         const parkData = await res.json();
 
-        let foundStation = parkData.STATIONS?.find((s) => s.id === activeStationId);
+        const rawPois = parkData.POIS || [];
+        const rawStations = parkData.STATIONS || [];
+
+        setAllPois(rawPois);
+        setAllStations(rawStations);
+
+        const selectedPoiIds = getUserSelectedPoiIds();
+
+        let routeStations = [];
+        if (selectedPoiIds) {
+          routeStations = rawStations.filter((s) => selectedPoiIds.includes(s.poiId));
+        } else {
+          routeStations = rawStations;
+        }
+
+        if (!activeStationId) {
+          setLoading(false);
+          return;
+        }
+
+        let foundStation = rawStations.find((s) => s.id === activeStationId);
         let foundPoi = null;
 
         if (foundStation) {
-          foundPoi = parkData.POIS?.find((p) => p.id === foundStation.poiId);
+          foundPoi = rawPois.find((p) => p.id === foundStation.poiId);
         } else {
-          foundPoi = parkData.POIS?.find((p) => p.id === activeStationId);
-          foundStation = parkData.STATIONS?.find((s) => s.poiId === activeStationId) || {
+          foundPoi = rawPois.find((p) => p.id === activeStationId);
+          foundStation = rawStations.find((s) => s.poiId === activeStationId) || {
             id: activeStationId,
             numeroConsecutivo: 1,
             poiId: foundPoi?.id,
             title: foundPoi?.name || 'Estación',
-            contentFolderPath: `estaciones/${activeStationId}/`
+            contentFolderPath: `public/estaciones/${activeStationId}/`
           };
         }
 
-        const selectables = parkData.POIS?.filter((p) => p.selectable) || [];
-        const total = parkData.STATIONS?.length || selectables.length || 1;
-        const currentNum = foundStation?.numeroConsecutivo || 1;
+        // Verificar si la estación escaneada pertenece a la ruta activa del usuario
+        if (selectedPoiIds && foundStation) {
+          const belongsToRoute = selectedPoiIds.includes(foundStation.poiId);
+          if (!belongsToRoute) {
+            setShowDeviationModal(true);
+          }
+        }
+
+        const stationIndexInRoute = routeStations.findIndex((s) => s.id === foundStation.id);
+        const total = routeStations.length || 1;
+        const currentNum = stationIndexInRoute !== -1 ? stationIndexInRoute + 1 : foundStation.numeroConsecutivo || 1;
+
         const resolvedTitle = foundStation?.title || foundPoi?.name || `Estación ${activeStationId}`;
 
         setTotalStations(total);
@@ -160,7 +202,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         setStationData(foundStation);
         setPoiData(foundPoi);
 
-        saveStationToCache(activeStationId, resolvedTitle);
+        saveStationToCache(foundStation.id, resolvedTitle);
 
         let folderPath = foundStation?.contentFolderPath || `/estaciones/${activeStationId}/`;
         folderPath = folderPath.replace(/^public\//, '/');
@@ -190,7 +232,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     for (let i = 1; i <= 20; i++) {
       let foundInThisIndex = false;
 
-      // 1. Check Texto
       for (const suffix of suffixes) {
         for (const ext of textExts) {
           const candidate = `${folderPath}${i}_texto${suffix}.${ext}`;
@@ -211,7 +252,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       }
       if (foundInThisIndex) continue;
 
-      // 2. Check Imagen
       for (const suffix of suffixes) {
         for (const ext of imgExts) {
           const candidate = `${folderPath}${i}_imagen${suffix}.${ext}`;
@@ -225,7 +265,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       }
       if (foundInThisIndex) continue;
 
-      // 3. Check Video
       for (const suffix of suffixes) {
         for (const ext of videoExts) {
           const candidate = `${folderPath}${i}_video${suffix}.${ext}`;
@@ -239,7 +278,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       }
       if (foundInThisIndex) continue;
 
-      // 4. Check Audio
       for (const suffix of suffixes) {
         for (const ext of audioExts) {
           const candidate = `${folderPath}${i}_audio${suffix}.${ext}`;
@@ -281,8 +319,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     setOrderedBlocks(blocks);
   };
 
-  // --- LÓGICA DE CONTROL WEB AUDIO API ---
-
   const stopAudio = () => {
     if (sourceNodeRef.current) {
       try {
@@ -295,7 +331,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   };
 
   const toggleWebAudio = async (audioUrl) => {
-    // Si ya se está reproduciendo este mismo audio, se pausa/detiene
     if (isPlayingAudio && currentAudioUrlRef.current === audioUrl) {
       stopAudio();
       return;
@@ -304,7 +339,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     try {
       setIsLoadingAudio(true);
 
-      // 1. Inicializar AudioContext en interacción del usuario
       if (!audioContextRef.current) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         audioContextRef.current = new AudioCtx();
@@ -315,21 +349,16 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         await ctx.resume();
       }
 
-      // Detener cualquier reproducción en curso
       stopAudio();
 
-      // 2. Descargar y decodificar buffer si es una nueva URL o no está en caché de memoria
       if (currentAudioUrlRef.current !== audioUrl || !audioBufferRef.current) {
         const response = await fetch(audioUrl);
         if (!response.ok) throw new Error('No se pudo descargar el archivo de audio');
         const arrayBuffer = await response.arrayBuffer();
-        
-        // Decodificación directa del formato PCM binario
         audioBufferRef.current = await ctx.decodeAudioData(arrayBuffer);
         currentAudioUrlRef.current = audioUrl;
       }
 
-      // 3. Crear nodo de reproducción
       const source = ctx.createBufferSource();
       source.buffer = audioBufferRef.current;
       source.connect(ctx.destination);
@@ -343,8 +372,8 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       setIsPlayingAudio(true);
 
     } catch (err) {
-      console.error('Error decodificando y reproduciendo audio con Web Audio API:', err);
-      alert('No se pudo decodificar el archivo de audio en este dispositivo.');
+      console.error('Error decodificando audio:', err);
+      alert('No se pudo decodificar el archivo de audio.');
     } finally {
       setIsLoadingAudio(false);
     }
@@ -360,54 +389,147 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     }
   };
 
+  const handleFinishRoute = () => {
+    // Aquí puedes registrar el evento/enviar métricas en el futuro
+    if (typeof onNavigate === 'function') {
+      onNavigate('home');
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  // Cálculo de progreso global para saber si completó el recorrido
+  const selectedPoiIds = getUserSelectedPoiIds();
+  const targetStations = selectedPoiIds
+    ? allStations.filter((st) => selectedPoiIds.includes(st.poiId))
+    : allStations;
+  
+  const currentVisitedList = getValidVisitedStations();
+  const visitedIds = currentVisitedList.map((v) => v.id);
+  const isRouteFinished = targetStations.length > 0 && targetStations.every((st) => visitedIds.includes(st.id));
+
+  // --- VISTA GENERAL (PROGRESO DEL RECORRIDO) ---
   if (!activeStationId) {
+    const pendingStations = targetStations.filter((st) => !visitedIds.includes(st.id));
+    const visitedInRoute = targetStations.filter((st) => visitedIds.includes(st.id));
+
     return (
-      <div className="min-h-screen bg-[#fcfdfd] flex flex-col items-center justify-start p-6 text-center font-sans pt-12">
-        <div className="w-16 h-16 bg-rose-100 text-[#e63946] rounded-full flex items-center justify-center mb-4 shadow-sm">
-          <span className="material-symbols-outlined text-3xl">qr_code_scanner</span>
+      <div className="min-h-screen bg-[#fcfdfd] flex flex-col items-center justify-start p-6 font-sans pt-10 pb-28 max-w-md mx-auto relative">
+        <div className="w-14 h-14 bg-rose-100 text-[#e63946] rounded-full flex items-center justify-center mb-3 shadow-sm">
+          <span className="material-symbols-outlined text-2xl">map</span>
         </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Estación No Especificada</h2>
-        <p className="text-sm text-gray-500 max-w-xs mb-6">
-          Por favor, escanea un código QR o aproxima un tag NFC para cargar la información de una estación.
+        <h2 className="text-xl font-bold text-gray-800 mb-1">Tu Progreso del Recorrido</h2>
+        <p className="text-xs text-gray-500 max-w-xs mb-6 text-center">
+          Escanea un código QR en cada punto para desbloquear la guía interactiva.
         </p>
+
+        <div className="w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm mb-6 flex items-center justify-around">
+          <div className="text-center">
+            <span className="text-2xl font-black text-[#4ea8de]">{visitedInRoute.length}</span>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Vistas</p>
+          </div>
+          <div className="h-8 w-[1px] bg-gray-100"></div>
+          <div className="text-center">
+            <span className="text-2xl font-black text-[#e63946]">{pendingStations.length}</span>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Faltantes</p>
+          </div>
+          <div className="h-8 w-[1px] bg-gray-100"></div>
+          <div className="text-center">
+            <span className="text-2xl font-black text-gray-700">{targetStations.length}</span>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">En Ruta</p>
+          </div>
+        </div>
 
         <button
           onClick={() => onNavigate && onNavigate('camara')}
-          className="bg-[#e63946] text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center gap-2 mb-8"
+          className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8"
         >
           <span className="material-symbols-outlined text-base">photo_camera</span>
-          Ir al Escáner
+          Escanear Estación
         </button>
 
-        {visitedStations.length > 0 && (
-          <div className="w-full max-w-sm text-left border-t border-gray-100 pt-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#767775] mb-3 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-base text-[#4ea8de]">history</span>
-              Estaciones Vistas (Últimas 24h)
+        {pendingStations.length > 0 && (
+          <div className="w-full text-left mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-[#e63946]">pending_actions</span>
+              Estaciones Pendientes por Visitar
             </h3>
             <div className="flex flex-col gap-2">
-              {visitedStations.map((st) => (
-                <button
-                  key={st.id}
-                  onClick={() => handleOpenVisitedStation(st.id)}
-                  className="w-full bg-white border border-gray-200 hover:border-[#4ea8de] p-3 rounded-xl flex items-center justify-between text-left transition-all shadow-sm hover:shadow-md cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#4ea8de]/10 text-[#4ea8de] flex items-center justify-center font-bold text-xs">
-                      {st.id}
+              {pendingStations.map((st) => {
+                const parentPoi = allPois.find((p) => p.id === st.poiId);
+                return (
+                  <div
+                    key={st.id}
+                    className="w-full bg-gray-50 border border-gray-200/80 p-3 rounded-xl flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#e63946] flex items-center justify-center font-bold text-xs">
+                        {st.numeroConsecutivo}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">{st.title}</p>
+                        <span className="text-[10px] text-gray-400">
+                          {parentPoi?.name || 'Ubicación'}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800 group-hover:text-[#4ea8de] transition-colors">
-                        {st.title}
-                      </p>
-                      <span className="text-[10px] text-gray-400">Guardado en caché</span>
-                    </div>
+                    <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                      Pendiente
+                    </span>
                   </div>
-                  <span className="material-symbols-outlined text-gray-400 group-hover:text-[#4ea8de] text-sm">
-                    chevron_right
-                  </span>
-                </button>
-              ))}
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {visitedInRoute.length > 0 && (
+          <div className="w-full text-left">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-[#4ea8de]">task_alt</span>
+              Estaciones Visitadas (Últimas 24h)
+            </h3>
+            <div className="flex flex-col gap-2">
+              {visitedInRoute.map((st) => {
+                const visitedInfo = visitedIds.includes(st.id);
+                return (
+                  <button
+                    key={st.id}
+                    onClick={() => handleOpenVisitedStation(st.id)}
+                    className="w-full bg-white border border-gray-200 hover:border-[#4ea8de] p-3 rounded-xl flex items-center justify-between text-left transition-all shadow-sm hover:shadow-md cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#4ea8de]/10 text-[#4ea8de] flex items-center justify-center font-bold text-xs">
+                        {st.numeroConsecutivo}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 group-hover:text-[#4ea8de] transition-colors">
+                          {st.title}
+                        </p>
+                        <span className="text-[10px] text-emerald-600 font-semibold">Completado</span>
+                      </div>
+                    </div>
+                    <span className="material-symbols-outlined text-gray-400 group-hover:text-[#4ea8de] text-sm">
+                      chevron_right
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Botón flotante al haber completado la ruta en la vista general */}
+        {isRouteFinished && (
+          <div className="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[#fcfdfd] via-[#fcfdfd]/90 to-transparent z-40">
+            <div className="max-w-md mx-auto">
+              <button
+                onClick={handleFinishRoute}
+                className="w-full py-4 rounded-full bg-[#e63946] text-white font-bold text-sm shadow-lg hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 transform active:scale-95 duration-200 cursor-pointer"
+              >
+                <span className="material-symbols-outlined">flag</span>
+                TERMINAR RECORRIDO
+              </button>
             </div>
           </div>
         )}
@@ -431,21 +553,52 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const title = stationData?.title || poiData?.name || `Estación ${activeStationId}`;
 
   return (
-    <div className="bg-[#fcfdfd] text-[#767775] font-sans antialiased min-h-screen pb-24">
+    <div className="bg-[#fcfdfd] text-[#767775] font-sans antialiased min-h-screen pb-28 relative">
+      
+      {/* MODAL FLOTANTE DE ADVERTENCIA (DESVÍO DE RUTA) */}
+      {showDeviationModal && (
+        <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#4ea8de]/10 text-[#4ea8de] mb-4 mx-auto">
+              <span className="material-symbols-outlined text-3xl">location_off</span>
+            </div>
+            <h3 className="font-bold text-xl text-center text-[#767775] mb-2">Desvío de Ruta</h3>
+            <p className="text-sm text-[#767775] text-center mb-8 leading-relaxed">
+              📍 Esta estación no está en tu ruta actual. ¿Deseas explorarla de todos modos o volver a tu ruta original?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleBack}
+                className="w-full py-3.5 px-6 rounded-full bg-[#e63946] text-white font-bold text-sm hover:bg-[#db313f] transition-colors shadow-sm active:scale-95 cursor-pointer"
+              >
+                Volver a mi ruta
+              </button>
+              <button
+                onClick={() => setShowDeviationModal(false)}
+                className="w-full py-3.5 px-6 rounded-full bg-gray-100 text-[#767775] font-bold text-sm hover:bg-gray-200 transition-colors active:scale-95 cursor-pointer"
+              >
+                Explorar estación
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HEADER */}
       <header className="fixed top-0 w-full z-50 bg-[#fcfdfd]/90 backdrop-blur-md border-b border-[#1a1c1a]/10 h-16 flex items-center justify-between px-4">
         <button
           onClick={handleBack}
           aria-label="Volver al mapa"
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[#e2e3df]/20 transition-colors text-[#e63946] cursor-pointer"
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors text-[#e63946] cursor-pointer"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
 
         <div className="flex-1 px-4 flex flex-col items-center">
-          <span className="text-xs font-semibold text-[#767775] mb-1 uppercase tracking-widest">
+          <span className="text-xs font-semibold text-[#4ea8de] uppercase tracking-wider mb-1">
             Estación {currentIndex} de {totalStations}
           </span>
-          <div className="w-full bg-[#e2e3df] rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-[#4ea8de] h-full rounded-full transition-all duration-300"
               style={{ width: `${(currentIndex / totalStations) * 100}%` }}
@@ -456,6 +609,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         <div className="w-10"></div>
       </header>
 
+      {/* CONTENIDO PRINCIPAL DE LA ESTACIÓN */}
       <main className="pt-20 pb-8 md:max-w-3xl md:mx-auto">
         <div className="px-4 mb-6">
           <h1 className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em]">
@@ -517,7 +671,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
                   <button
                     onClick={() => toggleWebAudio(block.url)}
                     disabled={isLoadingAudio}
-                    className="w-12 h-12 bg-[#4ea8de] text-[#fcfdfd] rounded-full flex items-center justify-center flex-shrink-0 hover:bg-[#70c7ff] transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-12 h-12 bg-[#4ea8de] text-white rounded-full flex items-center justify-center flex-shrink-0 hover:bg-[#70c7ff] transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <span className="material-symbols-outlined">
                       {isLoadingAudio
@@ -545,14 +699,25 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         })}
       </main>
 
-      <div className="fixed bottom-0 w-full bg-[#fcfdfd]/95 backdrop-blur-md border-t border-[#767775]/5 p-4 z-50 flex justify-center">
-        <button
-          onClick={onNextStation}
-          className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer"
-        >
-          Siguiente Estación
-          <span className="material-symbols-outlined text-base">arrow_forward</span>
-        </button>
+      {/* FOOTER FLOTANTE */}
+      <div className="fixed bottom-0 left-0 w-full bg-[#fcfdfd]/95 backdrop-blur-md border-t border-gray-100 p-4 z-50 flex justify-center">
+        {isRouteFinished ? (
+          <button
+            onClick={handleFinishRoute}
+            className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
+          >
+            <span className="material-symbols-outlined text-base">flag</span>
+            TERMINAR RECORRIDO
+          </button>
+        ) : (
+          <button
+            onClick={onNextStation}
+            className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
+          >
+            Siguiente Estación
+            <span className="material-symbols-outlined text-base">arrow_forward</span>
+          </button>
+        )}
       </div>
     </div>
   );
