@@ -4,7 +4,7 @@
       "id": "domo",
       "name": "Domo (Mariposario)",
       "duration": 30,
-      "zone": "Zona Norte",
+      "zone": "Domo (Mariposario)",
       "description": "Santuario de mariposas en vuelo libre y conservación de especies.",
       "selectable": true,
       "icon": "emoji_nature",
@@ -17,7 +17,7 @@
       "id": "laboratorio",
       "name": "Laboratorio",
       "duration": 20,
-      "zone": "Centro de Investigación",
+      "zone": "Laboratorio",
       "description": "Observación del ciclo de vida, metamorfosis y eclosión.",
       "selectable": true,
       "icon": "science",
@@ -30,7 +30,7 @@
       "id": "mapa_colombia",
       "name": "Mapa de Colombia",
       "duration": 25,
-      "zone": "Zona Sur",
+      "zone": "Mapa de Colombia",
       "description": "Instalación topográfica a escala para explorar las regiones del país.",
       "selectable": true,
       "icon": "map",
@@ -43,7 +43,7 @@
       "id": "cabanas",
       "name": "Cabañas",
       "duration": 20,
-      "zone": "Zona de Hospedaje",
+      "zone": "Cabañas",
       "description": "Área de alojamiento e inmersión en la naturaleza.",
       "selectable": true,
       "icon": "cabin",
@@ -56,7 +56,7 @@
       "id": "recepcion_tienda",
       "name": "Recepción y Tienda de Recuerdos",
       "duration": 15,
-      "zone": "Entrada Principal",
+      "zone": "Recepción y Tienda de Recuerdos",
       "description": "Punto de bienvenida, información y souvenir ecológicos.",
       "selectable": true,
       "icon": "storefront",
@@ -69,7 +69,7 @@
       "id": "estacionamiento",
       "name": "Estacionamiento",
       "duration": 0,
-      "zone": "Entrada",
+      "zone": "Estacionamiento",
       "description": "Parqueadero general para vehículos.",
       "selectable": false,
       "icon": "local_parking",
@@ -82,7 +82,7 @@
       "id": "banos",
       "name": "Baños",
       "duration": 0,
-      "zone": "Zona Central",
+      "zone": "Baños",
       "description": "Servicios sanitarios.",
       "selectable": false,
       "icon": "wc",
@@ -95,7 +95,7 @@
       "id": "cafeteria",
       "name": "Cafetería",
       "duration": 0,
-      "zone": "Zona Central",
+      "zone": "Cafetería",
       "description": "Estación de bebidas, snacks y descanso.",
       "selectable": false,
       "icon": "restaurant",
@@ -108,7 +108,7 @@
       "id": "auditorio",
       "name": "Auditorio",
       "duration": 0,
-      "zone": "Centro Pedagógico",
+      "zone": "Auditorio",
       "description": "Espacio para charlas, conferencias y proyecciones.",
       "selectable": false,
       "icon": "groups",
@@ -123,10 +123,79 @@
       "id": "EST-001",
       "numeroConsecutivo": 1,
       "poiId": "recepcion_tienda",
-      "title": "¡Bienvenida!",
+      "title": "Bienvenida",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-001/",
-      "order": ["gallery", "text", "video", "audio"]
+      "order": [
+        "gallery",
+        "text",
+        "video",
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-002",
+      "numeroConsecutivo": 2,
+      "poiId": "cafeteria",
+      "title": "Casa y terrazas",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-002/"
+    },
+    {
+      "id": "EST-003",
+      "numeroConsecutivo": 3,
+      "poiId": "auditorio",
+      "title": "Jade",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-003/"
+    },
+    {
+      "id": "EST-004",
+      "numeroConsecutivo": 4,
+      "poiId": "auditorio",
+      "title": "Estanque",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-004/"
+    },
+    {
+      "id": "EST-005",
+      "numeroConsecutivo": 5,
+      "poiId": "auditorio",
+      "title": "Auditorio colibrí",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-005/"
+    },
+    {
+      "id": "EST-006",
+      "numeroConsecutivo": 6,
+      "poiId": "laboratorio",
+      "title": "Laboratorio",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-006/"
+    },
+    {
+      "id": "EST-007",
+      "numeroConsecutivo": 7,
+      "poiId": "domo",
+      "title": "Bienvenida mariposario",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-007/"
+    },
+    {
+      "id": "EST-008",
+      "numeroConsecutivo": 8,
+      "poiId": "domo",
+      "title": "Mariposario 2",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-008/"
+    },
+    {
+      "id": "EST-009",
+      "numeroConsecutivo": 9,
+      "poiId": "domo",
+      "title": "Mariposario cierre",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-009/"
     }
   ],
   "PREDEFINED_ROUTES": [

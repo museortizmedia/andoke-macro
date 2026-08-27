@@ -126,10 +126,8 @@
       "title": "Bienvenida",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-001/",
+      "audioFile": "1_audio.m4a",
       "order": [
-        "gallery",
-        "text",
-        "video",
         "audio"
       ]
     },
@@ -139,7 +137,11 @@
       "poiId": "cafeteria",
       "title": "Casa y terrazas",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-002/"
+      "contentFolderPath": "public/estaciones/EST-002/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-003",
@@ -147,7 +149,11 @@
       "poiId": "auditorio",
       "title": "Jade",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-003/"
+      "contentFolderPath": "public/estaciones/EST-003/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-004",
@@ -155,7 +161,11 @@
       "poiId": "auditorio",
       "title": "Estanque",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-004/"
+      "contentFolderPath": "public/estaciones/EST-004/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-005",
@@ -163,7 +173,11 @@
       "poiId": "auditorio",
       "title": "Auditorio colibrí",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-005/"
+      "contentFolderPath": "public/estaciones/EST-005/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-006",
@@ -171,7 +185,11 @@
       "poiId": "laboratorio",
       "title": "Laboratorio",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-006/"
+      "contentFolderPath": "public/estaciones/EST-006/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-007",
@@ -179,7 +197,11 @@
       "poiId": "domo",
       "title": "Bienvenida mariposario",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-007/"
+      "contentFolderPath": "public/estaciones/EST-007/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-008",
@@ -187,7 +209,11 @@
       "poiId": "domo",
       "title": "Mariposario 2",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-008/"
+      "contentFolderPath": "public/estaciones/EST-008/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     },
     {
       "id": "EST-009",
@@ -195,7 +221,11 @@
       "poiId": "domo",
       "title": "Mariposario cierre",
       "estado": "activa",
-      "contentFolderPath": "public/estaciones/EST-009/"
+      "contentFolderPath": "public/estaciones/EST-009/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
     }
   ],
   "PREDEFINED_ROUTES": [
