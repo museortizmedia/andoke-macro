@@ -158,12 +158,15 @@ export const InteractiveMapContent = ({ onNavigate }) => {
 
       {/* TopAppBar Desktop */}
       <header className="hidden md:flex bg-[#fcfdfd] w-full top-0 sticky z-40 justify-between items-center px-12 h-16 border-b border-[#e4bebc]/20">
-        <div className="text-2xl font-extrabold text-[#e63946] flex items-center gap-2">
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-            flutter_dash
-          </span>
-          Andoke
-        </div>
+         <img
+            src="./horizontal.webp"
+            alt="Andoke Logo"
+            className="h-14 w-auto object-contain"
+            onError={(e) => {
+              // Si no encuentra la imagen local del logo, muestra texto estilizado sin romperse
+              e.currentTarget.style.display = "none";
+            }}
+          />
       </header>
 
       {/* Buscador Móvil */}
