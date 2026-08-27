@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useDeviceLanguage } from '../../hooks/useDeviceLanguage'
+import React, { useState, useEffect, useRef } from 'react';
+import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
 
 const CACHE_KEY = 'visited_stations_cache';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -54,7 +54,7 @@ const checkResourceExists = async (url, expectedType = 'image') => {
       return contentType.includes('image') || /\.(jpg|jpeg|png|webp|svg)$/i.test(url);
     }
     if (expectedType === 'audio') {
-      return contentType.includes('audio') || /\.(mp3|wav|ogg)$/i.test(url);
+      return contentType.includes('audio') || /\.(mp3|wav|ogg|m4a)$/i.test(url);
     }
     if (expectedType === 'video') {
       return contentType.includes('video') || /\.(mp4|webm)$/i.test(url);
@@ -83,8 +83,13 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const [visitedStations, setVisitedStations] = useState([]);
   const [orderedBlocks, setOrderedBlocks] = useState([]);
 
+  // --- ESTADOS Y REFERENCIAS PARA WEB AUDIO API ---
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [audioRef, setAudioRef] = useState(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const audioContextRef = useRef(null);
+  const audioBufferRef = useRef(null);
+  const sourceNodeRef = useRef(null);
+  const currentAudioUrlRef = useRef(null);
 
   useEffect(() => {
     const syncStationFromURL = () => {
@@ -99,6 +104,22 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   useEffect(() => {
     setVisitedStations(getValidVisitedStations());
   }, [activeStationId]);
+
+  // Limpiar reproductor al cambiar de estación o desmontar
+  useEffect(() => {
+    stopAudio();
+    audioBufferRef.current = null;
+    currentAudioUrlRef.current = null;
+  }, [activeStationId]);
+
+  useEffect(() => {
+    return () => {
+      stopAudio();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeStationId) {
@@ -161,7 +182,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const scanAndBuildSequentialContent = async (folderPath, poi, suffixes) => {
     const imgExts = ['jpg', 'jpeg', 'png', 'webp'];
     const videoExts = ['mp4', 'webm'];
-    const audioExts = ['mp3', 'wav', 'ogg'];
+    const audioExts = ['mp3', 'm4a', 'wav', 'ogg'];
     const textExts = ['txt'];
 
     const rawItems = [];
@@ -260,14 +281,72 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     setOrderedBlocks(blocks);
   };
 
-  const toggleAudio = () => {
-    if (!audioRef) return;
-    if (isPlayingAudio) {
-      audioRef.pause();
-      setIsPlayingAudio(false);
-    } else {
-      audioRef.play();
+  // --- LÓGICA DE CONTROL WEB AUDIO API ---
+
+  const stopAudio = () => {
+    if (sourceNodeRef.current) {
+      try {
+        sourceNodeRef.current.stop();
+        sourceNodeRef.current.disconnect();
+      } catch (e) {}
+      sourceNodeRef.current = null;
+    }
+    setIsPlayingAudio(false);
+  };
+
+  const toggleWebAudio = async (audioUrl) => {
+    // Si ya se está reproduciendo este mismo audio, se pausa/detiene
+    if (isPlayingAudio && currentAudioUrlRef.current === audioUrl) {
+      stopAudio();
+      return;
+    }
+
+    try {
+      setIsLoadingAudio(true);
+
+      // 1. Inicializar AudioContext en interacción del usuario
+      if (!audioContextRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioContextRef.current = new AudioCtx();
+      }
+
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
+      // Detener cualquier reproducción en curso
+      stopAudio();
+
+      // 2. Descargar y decodificar buffer si es una nueva URL o no está en caché de memoria
+      if (currentAudioUrlRef.current !== audioUrl || !audioBufferRef.current) {
+        const response = await fetch(audioUrl);
+        if (!response.ok) throw new Error('No se pudo descargar el archivo de audio');
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Decodificación directa del formato PCM binario
+        audioBufferRef.current = await ctx.decodeAudioData(arrayBuffer);
+        currentAudioUrlRef.current = audioUrl;
+      }
+
+      // 3. Crear nodo de reproducción
+      const source = ctx.createBufferSource();
+      source.buffer = audioBufferRef.current;
+      source.connect(ctx.destination);
+      
+      source.onended = () => {
+        setIsPlayingAudio(false);
+      };
+
+      sourceNodeRef.current = source;
+      source.start(0);
       setIsPlayingAudio(true);
+
+    } catch (err) {
+      console.error('Error decodificando y reproduciendo audio con Web Audio API:', err);
+      alert('No se pudo decodificar el archivo de audio en este dispositivo.');
+    } finally {
+      setIsLoadingAudio(false);
     }
   };
 
@@ -433,23 +512,28 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
             return (
               <div key={`audio-${idx}`} className="px-4 mb-8">
                 <h2 className="text-xl font-semibold text-[#e63946] mb-3">Escucha la Guía</h2>
-                <audio
-                  ref={(ref) => setAudioRef(ref)}
-                  src={block.url}
-                  onEnded={() => setIsPlayingAudio(false)}
-                />
+                
                 <div className="bg-white border border-[#767775]/10 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                   <button
-                    onClick={toggleAudio}
-                    className="w-12 h-12 bg-[#4ea8de] text-[#fcfdfd] rounded-full flex items-center justify-center flex-shrink-0 hover:bg-[#70c7ff] transition-colors cursor-pointer"
+                    onClick={() => toggleWebAudio(block.url)}
+                    disabled={isLoadingAudio}
+                    className="w-12 h-12 bg-[#4ea8de] text-[#fcfdfd] rounded-full flex items-center justify-center flex-shrink-0 hover:bg-[#70c7ff] transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <span className="material-symbols-outlined">
-                      {isPlayingAudio ? 'pause' : 'play_arrow'}
+                      {isLoadingAudio
+                        ? 'progress_activity'
+                        : isPlayingAudio
+                        ? 'pause'
+                        : 'play_arrow'}
                     </span>
                   </button>
                   <div className="flex-1">
                     <div className="text-xs font-semibold text-[#4ea8de]">
-                      {isPlayingAudio ? 'Reproduciendo audio...' : 'Audio Guía disponible'}
+                      {isLoadingAudio
+                        ? 'Decodificando audio...'
+                        : isPlayingAudio
+                        ? 'Reproduciendo audio...'
+                        : 'Audio Guía disponible'}
                     </div>
                   </div>
                 </div>
