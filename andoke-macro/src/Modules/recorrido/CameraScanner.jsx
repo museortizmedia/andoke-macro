@@ -13,6 +13,7 @@ const DEV_TEST_CODES = [
   { label: 'Estación 06', value: 'EST-006' },
   { label: 'Estación 07', value: 'EST-007' },
   { label: 'Estación 08', value: 'EST-008' },
+  { label: 'Estación 09', value: 'EST-009' },
   { label: 'URL Directa Completa', value: 'http://localhost:5173/estaciones?id=EST-001' },
   { label: 'Código Inválido / Error', value: 'CODIGO_DESCONOCIDO_123' }
 ];
