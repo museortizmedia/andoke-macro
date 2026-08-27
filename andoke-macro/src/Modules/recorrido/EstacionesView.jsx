@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
+import AudioPlayer from '../../components/AudioPlayer'
+import VideoPlayer from '../../components/VideoPlayer';
 
 const CACHE_KEY = 'visited_stations_cache';
 const ROUTE_KEY = 'user_selected_route';
@@ -93,7 +95,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const [totalStations, setTotalStations] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(1);
   const [visitedStations, setVisitedStations] = useState([]);
-  
+
   // Control de desviación de ruta
   const [showDeviationModal, setShowDeviationModal] = useState(false);
 
@@ -246,7 +248,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
                 break;
               }
             }
-          } catch (e) {}
+          } catch (e) { }
         }
         if (foundInThisIndex) break;
       }
@@ -324,7 +326,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       try {
         sourceNodeRef.current.stop();
         sourceNodeRef.current.disconnect();
-      } catch (e) {}
+      } catch (e) { }
       sourceNodeRef.current = null;
     }
     setIsPlayingAudio(false);
@@ -362,7 +364,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       const source = ctx.createBufferSource();
       source.buffer = audioBufferRef.current;
       source.connect(ctx.destination);
-      
+
       source.onended = () => {
         setIsPlayingAudio(false);
       };
@@ -403,7 +405,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const targetStations = selectedPoiIds
     ? allStations.filter((st) => selectedPoiIds.includes(st.poiId))
     : allStations;
-  
+
   const currentVisitedList = getValidVisitedStations();
   const visitedIds = currentVisitedList.map((v) => v.id);
   const isRouteFinished = targetStations.length > 0 && targetStations.every((st) => visitedIds.includes(st.id));
@@ -554,7 +556,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
 
   return (
     <div className="bg-[#fcfdfd] text-[#767775] font-sans antialiased min-h-screen pb-28 relative">
-      
+
       {/* MODAL FLOTANTE DE ADVERTENCIA (DESVÍO DE RUTA) */}
       {showDeviationModal && (
         <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
@@ -618,12 +620,46 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         </div>
 
         {orderedBlocks.map((block, idx) => {
+
+
           if (block.type === 'text') {
+            // Separamos el contenido por líneas
+            const lines = block.content.split('\n');
+
             return (
-              <div key={`text-${idx}`} className="px-4 mb-6">
-                <p className="text-base leading-6 text-[#767775] font-normal whitespace-pre-line">
-                  {block.content}
-                </p>
+              <div key={`text-${idx}`} className="px-4 mb-6 space-y-3">
+                {lines.map((line, lineIdx) => {
+                  const trimmedLine = line.trim();
+
+                  // Si la línea comienza con # (ejemplo: "# Mi Título")
+                  if (trimmedLine.startsWith('#')) {
+                    const titleText = trimmedLine.replace(/^#+\s*/, ''); // Extrae el símbolo # y los espacios iniciales
+
+                    return (
+                      <h1
+                        key={lineIdx}
+                        className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em] my-2"
+                      >
+                        {titleText}
+                      </h1>
+                    );
+                  }
+
+                  // Si es una línea vacía, mantenemos el espacio visual
+                  if (!trimmedLine) {
+                    return <div key={lineIdx} className="h-2" />;
+                  }
+
+                  // El resto del texto normal
+                  return (
+                    <p
+                      key={lineIdx}
+                      className="text-base leading-6 text-[#767775] font-normal"
+                    >
+                      {line}
+                    </p>
+                  );
+                })}
               </div>
             );
           }
@@ -633,20 +669,26 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
             return (
               <div key={`gallery-${idx}`} className="px-4 mb-8">
                 <div className={isSingle ? "w-full" : "grid grid-cols-2 gap-3"}>
-                  {block.items.map((imgSrc, imgIdx) => (
-                    <div
-                      key={imgIdx}
-                      className={`${
-                        isSingle ? 'w-full aspect-video' : 'aspect-square'
-                      } rounded-xl overflow-hidden border border-[#767775]/10 bg-gray-100 shadow-sm`}
-                    >
-                      <img
-                        className="w-full h-full object-cover"
-                        alt={`Recurso ${imgIdx + 1}`}
-                        src={imgSrc}
-                      />
-                    </div>
-                  ))}
+                  {block.items.map((imgSrc, imgIdx) => {
+                    // Alterna esquinas según si el índice es par o impar
+                    const organicCorners = imgIdx % 2 === 0
+                      ? 'rounded-tl-3xl rounded-br-3xl' // Arriba-Izquierda e Inferior-Derecha
+                      : 'rounded-tr-3xl rounded-bl-3xl'; // Arriba-Derecha e Inferior-Izquierda
+
+                    return (
+                      <div
+                        key={imgIdx}
+                        className={`${isSingle ? 'w-full aspect-video' : 'aspect-square'
+                          } ${organicCorners} overflow-hidden shadow-sm transition-transform duration-300 hover:scale-[1.02]`}
+                      >
+                        <img
+                          className="w-full h-full object-cover"
+                          alt={`Recurso ${imgIdx + 1}`}
+                          src={imgSrc}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -655,9 +697,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
           if (block.type === 'video') {
             return (
               <div key={`video-${idx}`} className="px-4 mb-8">
-                <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg border border-[#767775]/10 bg-black">
-                  <video src={block.url} controls className="w-full h-full object-cover" />
-                </div>
+                <VideoPlayer src={block.url} poster={block.poster} />
               </div>
             );
           }
@@ -665,32 +705,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
           if (block.type === 'audio') {
             return (
               <div key={`audio-${idx}`} className="px-4 mb-8">
-                <h2 className="text-xl font-semibold text-[#e63946] mb-3">Escucha la Guía</h2>
-                
-                <div className="bg-white border border-[#767775]/10 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
-                  <button
-                    onClick={() => toggleWebAudio(block.url)}
-                    disabled={isLoadingAudio}
-                    className="w-12 h-12 bg-[#4ea8de] text-white rounded-full flex items-center justify-center flex-shrink-0 hover:bg-[#70c7ff] transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <span className="material-symbols-outlined">
-                      {isLoadingAudio
-                        ? 'progress_activity'
-                        : isPlayingAudio
-                        ? 'pause'
-                        : 'play_arrow'}
-                    </span>
-                  </button>
-                  <div className="flex-1">
-                    <div className="text-xs font-semibold text-[#4ea8de]">
-                      {isLoadingAudio
-                        ? 'Decodificando audio...'
-                        : isPlayingAudio
-                        ? 'Reproduciendo audio...'
-                        : 'Audio Guía disponible'}
-                    </div>
-                  </div>
-                </div>
+                <AudioPlayer src={block.url} title="Escucha la Guía" />
               </div>
             );
           }
@@ -700,24 +715,16 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       </main>
 
       {/* FOOTER FLOTANTE */}
-      <div className="fixed bottom-0 left-0 w-full bg-[#fcfdfd]/95 backdrop-blur-md border-t border-gray-100 p-4 z-50 flex justify-center">
-        {isRouteFinished ? (
-          <button
+      <div className="fixed bottom-16 left-0 w-full bg-[#fcfdfd]/95 backdrop-blur-md border-t border-gray-100 p-4 z-50 flex justify-center">
+        {/*isRouteFinished*/ true &&
+        <button
             onClick={handleFinishRoute}
             className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">flag</span>
             TERMINAR RECORRIDO
           </button>
-        ) : (
-          <button
-            onClick={onNextStation}
-            className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
-          >
-            Siguiente Estación
-            <span className="material-symbols-outlined text-base">arrow_forward</span>
-          </button>
-        )}
+        }
       </div>
     </div>
   );
