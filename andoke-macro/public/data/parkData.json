@@ -123,7 +123,7 @@
       "id": "EST-001",
       "numeroConsecutivo": 1,
       "poiId": "recepcion_tienda",
-      "title": "¡Bienvenida e Introducción!",
+      "title": "Bienvenida",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-001/",
       "order": [
@@ -136,58 +136,66 @@
     {
       "id": "EST-002",
       "numeroConsecutivo": 2,
-      "poiId": "auditorio",
-      "title": "Charla Didáctica y Proyecciones",
+      "poiId": "cafeteria",
+      "title": "Casa y terrazas",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-002/"
     },
     {
       "id": "EST-003",
       "numeroConsecutivo": 3,
-      "poiId": "mapa_colombia",
-      "title": "Exploración Geográfica de Colombia",
+      "poiId": "auditorio",
+      "title": "Jade",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-003/"
     },
     {
       "id": "EST-004",
       "numeroConsecutivo": 4,
-      "poiId": "laboratorio",
-      "title": "Ciclo de Vida y Metamorfosis",
+      "poiId": "auditorio",
+      "title": "Estanque",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-004/"
     },
     {
       "id": "EST-005",
       "numeroConsecutivo": 5,
-      "poiId": "domo",
-      "title": "Vuelo Libre en el Mariposario",
+      "poiId": "auditorio",
+      "title": "Auditorio colibrí",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-005/"
     },
     {
       "id": "EST-006",
       "numeroConsecutivo": 6,
-      "poiId": "cafeteria",
-      "title": "Pausa y Refrigerio Ecofriendly",
+      "poiId": "laboratorio",
+      "title": "Laboratorio",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-006/"
     },
     {
       "id": "EST-007",
       "numeroConsecutivo": 7,
-      "poiId": "cabanas",
-      "title": "Inmersión y Hospedaje en la Naturaleza",
+      "poiId": "domo",
+      "title": "Bienvenida mariposario",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-007/"
     },
     {
       "id": "EST-008",
       "numeroConsecutivo": 8,
-      "poiId": "recepcion_tienda",
-      "title": "Despedida y Souvenirs",
+      "poiId": "domo",
+      "title": "Mariposario 2",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-008/"
+    },
+    {
+      "id": "EST-009",
+      "numeroConsecutivo": 9,
+      "poiId": "domo",
+      "title": "Mariposario cierre",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-009/"
     }
   ],
   "PREDEFINED_ROUTES": [
