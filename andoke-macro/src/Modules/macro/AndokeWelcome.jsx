@@ -1,14 +1,18 @@
 import React, { useState } from "react";
+import Portada from "/portada.webp"
+import WelcomeVideo from "/estaciones/EST-000/3_video.mp4"
 
 export default function AndokeWelcome({ onNavigate }) {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   // URLs estables con fallback automático en caso de fallo de red
   const [heroImg, setHeroImg] = useState(
-    "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop"
+    //"https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop"
+    Portada
   );
   const [videoSrc, setVideoSrc] = useState(
-    "https://cdn.jsdelivr.net/npm/video-media-samples/big-buck-bunny-1080p-60fps-30sec.mp4"
+    //"https://andoke.com.co/wp-content/uploads/2024/01/Andoke-WEB-home.mp4"
+    WelcomeVideo
   );
 
   const handleGoToMap = () => {
@@ -42,22 +46,24 @@ export default function AndokeWelcome({ onNavigate }) {
         {/* Hero Video Banner / Card */}
         <div
           onClick={() => setIsVideoOpen(true)}
-          className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-sm border border-[#e4bebc]/20 mb-8 cursor-pointer group bg-slate-900"
+          className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-sm mb-8 cursor-pointer group bg-slate-900"
         >
           <img
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             alt="Parque Andoke"
             src={heroImg}
             onError={() => {
-              // Fallback si la imagen de Unsplash falla
               setHeroImg(
                 "https://picsum.photos/id/1018/1200/675"
               );
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent flex flex-col justify-between p-6">
+
+          {/* Gradiente de Rojo (#e63946) a Transparente hacia arriba */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#e63946]/90 via-[#e63946]/30 to-transparent flex flex-col justify-between p-6">
             <div className="flex justify-end">
-              <div className="w-12 h-12 rounded-full bg-[#e63946] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              {/* Botón Play ajustado a blanco/translucido para contrastar con el fondo rojo */}
+              <div className="w-12 h-12 rounded-full bg-white text-[#e63946] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span
                   className="material-symbols-outlined text-2xl"
                   style={{ fontVariationSettings: "'FILL' 1" }}
@@ -66,11 +72,13 @@ export default function AndokeWelcome({ onNavigate }) {
                 </span>
               </div>
             </div>
+
             <div>
-              <span className="text-[#4ea8de] text-xs font-bold uppercase tracking-wider mb-1 block">
+              {/* Texto de la categoría en color blanco suave para legibilidad sobre el rojo */}
+              <span className="text-white/90 text-xs font-bold uppercase tracking-wider mb-1 block">
                 Guía Interactiva • Video de Bienvenida
               </span>
-              <h1 className="text-2xl font-extrabold text-white leading-tight">
+              <h1 className="text-2xl font-extrabold text-white leading-tight drop-shadow-sm">
                 ¡Bienvenido a Andoke!
               </h1>
             </div>
@@ -110,48 +118,45 @@ export default function AndokeWelcome({ onNavigate }) {
           </div>
         )}
 
-        {/* Instrucciones de Uso */}
+        {/* Instrucciones */}
         <section className="w-full mb-8">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-[#767775]">
               ¿Cómo interactuar en el parque?
             </h2>
             <p className="text-xs text-[#767775]/80 mt-1">
-              En cada estación encontrarás placas interactivas. Usa tu teléfono
-              directamente sin instalar aplicaciones.
+              En cada estación encontrarás placas interactivas. Usa tu teléfono sin instalar aplicaciones.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-            {/* Opción NFC */}
-            <div className="bg-white p-5 rounded-2xl border border-[#e4bebc]/30 shadow-sm flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[#4ea8de]/15 text-[#4ea8de] flex items-center justify-center mb-3">
+            {/* Opción NFC (Círculo Azul / Icono Blanco) */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-[#4ea8de] text-white flex items-center justify-center mb-3 shadow-sm">
                 <span className="material-symbols-outlined text-2xl">
                   contactless
                 </span>
               </div>
               <h3 className="font-bold text-sm text-[#767775] mb-1">
-                1. Tecnología NFC
+                NFC
               </h3>
               <p className="text-xs text-[#767775]/80 leading-relaxed">
-                Acerca la parte trasera de tu celular a la placa de madera para
-                abrir el contenido interactivo.
+                Acerca la parte trasera de tu celular a la placa.
               </p>
             </div>
 
-            {/* Opción QR */}
-            <div className="bg-white p-5 rounded-2xl border border-[#e4bebc]/30 shadow-sm flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[#52b788]/15 text-[#52b788] flex items-center justify-center mb-3">
+            {/* Opción QR (Círculo Verde / Icono Blanco) */}
+            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-[#52b788] text-white flex items-center justify-center mb-3 shadow-sm">
                 <span className="material-symbols-outlined text-2xl">
                   qr_code_scanner
                 </span>
               </div>
               <h3 className="font-bold text-sm text-[#767775] mb-1">
-                2. Código QR
+                Código QR
               </h3>
               <p className="text-xs text-[#767775]/80 leading-relaxed">
-                Abre la cámara de tu celular, apunta al código de la estación y
-                toca el enlace desplegado.
+                Escanea el código con la cámara de tu celular.
               </p>
             </div>
           </div>
@@ -164,7 +169,7 @@ export default function AndokeWelcome({ onNavigate }) {
             className="w-full mb-16 bg-[#e63946] text-white font-bold text-base py-4 px-8 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-xl">map</span>
-            Explorar el Mapa e Iniciar
+            Revisar mi ruta
           </button>
         </div>
       </main>

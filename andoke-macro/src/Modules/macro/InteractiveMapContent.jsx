@@ -14,7 +14,7 @@ const DEFAULT_CENTER_COORDS = [
 
 const SELECTED_ROUTE_CACHE_KEY = 'user_selected_route';
 
-export const InteractiveMapContent = () => {
+export const InteractiveMapContent = ({ onNavigate }) => {
   const [extendedPois, setExtendedPois] = useState([]);
   const [routesConfig, setRoutesConfig] = useState([]);
   const [selectedStationIds, setSelectedStationIds] = useState([]);
@@ -93,6 +93,7 @@ export const InteractiveMapContent = () => {
   const handleSaveAndStartRoute = () => {
     // Guardar en localStorage
     localStorage.setItem(SELECTED_ROUTE_CACHE_KEY, JSON.stringify(selectedStationIds));
+    onNavigate("camara")
   };
 
   const toggleStation = (id) => {
@@ -280,7 +281,7 @@ export const InteractiveMapContent = () => {
             <div className="flex justify-between items-end mb-4">
               <div>
                 <h2 className="text-2xl font-bold text-[#767775]">Atracciones</h2>
-                <p className="text-xs text-[#767775]/70">Selecciona o quita lugares para tu recorrido</p>
+                <p className="text-xs text-[#767775]/70">Selecciona o quita lugares para definir recorrido personalizado</p>
               </div>
               <span className="font-bold text-xs text-[#4ea8de] bg-[#4ea8de]/10 px-2.5 py-1 rounded-full whitespace-nowrap">
                 {selectedStationIds.length} de {selectableStations.length} Activas
@@ -352,7 +353,7 @@ export const InteractiveMapContent = () => {
               className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-              Guardar mi Recorrido ({formattedTime()})
+              Guardar mi recorrido ({formattedTime()})
             </button>
           </div>
         </div>
@@ -365,7 +366,7 @@ export const InteractiveMapContent = () => {
           className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-          Guardar mi Recorrido ({formattedTime()})
+          Guardar mi recorrido ({formattedTime()})
         </button>
       </div>
     </div>

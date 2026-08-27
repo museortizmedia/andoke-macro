@@ -123,9 +123,9 @@ export const CameraScanner = ({ onNavigate }) => {
 
       {/* Encabezado */}
       <div className="w-full max-w-md text-center mt-4">
-        <h1 className="text-2xl font-extrabold text-[#767775]">Escáner de Estación</h1>
+        <h1 className="text-2xl font-extrabold text-[#767775]">Escáner</h1>
         <p className="text-xs text-[#767775]/80 mt-1">
-          Apunta con la cámara, sube una imagen del QR o acerca tu celular a una etiqueta NFC
+          Apunta con la cámara al QR o acerca tu celular a una estación
         </p>
       </div>
 

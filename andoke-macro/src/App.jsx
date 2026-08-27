@@ -82,7 +82,7 @@ function MainAppContent() {
       case 'inicio':
         return <AndokeWelcome onNavigate={handleNavigate} />;
       case 'mapa':
-        return <InteractiveMapContent />;
+        return <InteractiveMapContent onNavigate={handleNavigate} />;
       case 'camara':
         return <CameraScanner onNavigate={handleNavigate} />;
       case 'estaciones':
