@@ -615,49 +615,72 @@ export const AdminStations = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {parkData.STATIONS.map((estacion) => {
-                      const poiAsociado = parkData.POIS.find((p) => p.id === estacion.poiId);
+  const poiAsociado = parkData.POIS.find((p) => p.id === estacion.poiId);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(estacion.id)}`;
 
-                      return (
-                        <div
-                          key={estacion.id}
-                          className="bg-white rounded-xl shadow border border-[#e8e8e6] flex flex-col overflow-hidden"
-                        >
-                          <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
-                            <div>
-                              <span className="text-[10px] text-emerald-400 font-bold uppercase block">
-                                Consecutivo #{estacion.numeroConsecutivo}
-                              </span>
-                              <h4 className="font-mono text-xl font-bold">{estacion.id}</h4>
-                            </div>
-                            <span className="material-symbols-outlined text-slate-400">sensors</span>
-                          </div>
+  return (
+    <div
+      key={estacion.id}
+      className="bg-white rounded-xl shadow border border-[#e8e8e6] flex flex-col overflow-hidden"
+    >
+      <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
+        <div>
+          <span className="text-[10px] text-emerald-400 font-bold uppercase block">
+            Consecutivo #{estacion.numeroConsecutivo}
+          </span>
+          <h4 className="font-mono text-xl font-bold">{estacion.id}</h4>
+        </div>
+        <span className="material-symbols-outlined text-slate-400">sensors</span>
+      </div>
 
-                          <div className="p-4 flex flex-col flex-1">
-                            <h3 className="text-lg font-bold text-[#b7102a] mb-1">
-                              {estacion.title || 'Sin Título'}
-                            </h3>
-                            <p className="text-xs text-[#767775] mb-4">
-                              POI: <span className="font-semibold text-slate-800">{poiAsociado?.name || 'N/A'}</span>
-                            </p>
+      <div className="p-4 flex flex-col flex-1">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-[#b7102a] mb-1">
+              {estacion.title || 'Sin Título'}
+            </h3>
+            <p className="text-xs text-[#767775]">
+              POI: <span className="font-semibold text-slate-800">{poiAsociado?.name || 'N/A'}</span>
+            </p>
+          </div>
 
-                            <div className="mt-auto pt-3 flex items-center justify-end gap-2 border-t">
-                              <button
-                                onClick={() => handleAbrirEditarEstacion(estacion)}
-                                className="bg-[#eeeeeb] hover:bg-[#e3e2e0] text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">folder_open</span> Gestionar Recursos
-                              </button>
-                              <button
-                                onClick={() => handleEliminarEstacion(estacion.id)}
-                                className="bg-[#ffdad8] text-[#b7102a] font-bold text-xs p-2 rounded-lg"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">delete</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+          {/* Renderizado del Código QR */}
+          <div className="flex flex-col items-center flex-shrink-0 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
+            <img
+              src={qrUrl}
+              alt={`QR para ${estacion.id}`}
+              className="w-16 h-16 object-contain"
+              loading="lazy"
+            />
+            <a
+              href={qrUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[9px] text-[#006590] hover:underline font-bold mt-1"
+            >
+              Descargar
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-auto pt-3 flex items-center justify-end gap-2 border-t">
+          <button
+            onClick={() => handleAbrirEditarEstacion(estacion)}
+            className="bg-[#eeeeeb] hover:bg-[#e3e2e0] text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-[16px]">folder_open</span> Gestionar Recursos
+          </button>
+          <button
+            onClick={() => handleEliminarEstacion(estacion.id)}
+            className="bg-[#ffdad8] text-[#b7102a] font-bold text-xs p-2 rounded-lg"
+          >
+            <span className="material-symbols-outlined text-[16px]">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+})}
                   </div>
                 </div>
               )}

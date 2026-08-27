@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useDeviceLanguage } from '../../hooks/useDeviceLanguage'
 
 const CACHE_KEY = 'visited_stations_cache';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// --- FUNCIONES AUXILIARES DE CACHÉ Y VALIDACIÓN ---
 
 const getValidVisitedStations = () => {
   try {
@@ -63,7 +66,11 @@ const checkResourceExists = async (url, expectedType = 'image') => {
   }
 };
 
+// --- COMPONENTE PRINCIPAL ---
+
 export default function EstacionesView({ onNextStation, onNavigate }) {
+  const { language, langSuffixes } = useDeviceLanguage('es');
+
   const [activeStationId, setActiveStationId] = useState(() => {
     return new URLSearchParams(window.location.search).get('id');
   });
@@ -139,7 +146,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         if (!folderPath.startsWith('/')) folderPath = '/' + folderPath;
         if (!folderPath.endsWith('/')) folderPath += '/';
 
-        await scanAndBuildSequentialContent(folderPath, foundPoi);
+        await scanAndBuildSequentialContent(folderPath, foundPoi, langSuffixes);
 
       } catch (err) {
         console.error('Error cargando información de la estación:', err);
@@ -149,9 +156,9 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     }
 
     loadStationInfo();
-  }, [activeStationId]);
+  }, [activeStationId, language]);
 
-  const scanAndBuildSequentialContent = async (folderPath, poi) => {
+  const scanAndBuildSequentialContent = async (folderPath, poi, suffixes) => {
     const imgExts = ['jpg', 'jpeg', 'png', 'webp'];
     const videoExts = ['mp4', 'webm'];
     const audioExts = ['mp3', 'wav', 'ogg'];
@@ -162,57 +169,68 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     for (let i = 1; i <= 20; i++) {
       let foundInThisIndex = false;
 
-      // Check Texto primero o paralelo
-      for (const ext of textExts) {
-        const candidate = `${folderPath}${i}_texto.${ext}`;
-        try {
-          const res = await fetch(candidate);
-          const contentType = res.headers.get('content-type') || '';
-          if (res.ok && !contentType.includes('text/html')) {
-            const rawText = await res.text();
-            if (rawText && !rawText.toLowerCase().includes('<!doctype html>')) {
-              rawItems.push({ type: 'text', content: rawText, index: i });
-              foundInThisIndex = true;
-              break;
+      // 1. Check Texto
+      for (const suffix of suffixes) {
+        for (const ext of textExts) {
+          const candidate = `${folderPath}${i}_texto${suffix}.${ext}`;
+          try {
+            const res = await fetch(candidate);
+            const contentType = res.headers.get('content-type') || '';
+            if (res.ok && !contentType.includes('text/html')) {
+              const rawText = await res.text();
+              if (rawText && !rawText.toLowerCase().includes('<!doctype html>')) {
+                rawItems.push({ type: 'text', content: rawText, index: i });
+                foundInThisIndex = true;
+                break;
+              }
             }
+          } catch (e) {}
+        }
+        if (foundInThisIndex) break;
+      }
+      if (foundInThisIndex) continue;
+
+      // 2. Check Imagen
+      for (const suffix of suffixes) {
+        for (const ext of imgExts) {
+          const candidate = `${folderPath}${i}_imagen${suffix}.${ext}`;
+          if (await checkResourceExists(candidate, 'image')) {
+            rawItems.push({ type: 'image', url: candidate, index: i });
+            foundInThisIndex = true;
+            break;
           }
-        } catch (e) {}
+        }
+        if (foundInThisIndex) break;
       }
       if (foundInThisIndex) continue;
 
-      // Check Imagen
-      for (const ext of imgExts) {
-        const candidate = `${folderPath}${i}_imagen.${ext}`;
-        if (await checkResourceExists(candidate, 'image')) {
-          rawItems.push({ type: 'image', url: candidate, index: i });
-          foundInThisIndex = true;
-          break;
+      // 3. Check Video
+      for (const suffix of suffixes) {
+        for (const ext of videoExts) {
+          const candidate = `${folderPath}${i}_video${suffix}.${ext}`;
+          if (await checkResourceExists(candidate, 'video')) {
+            rawItems.push({ type: 'video', url: candidate, index: i });
+            foundInThisIndex = true;
+            break;
+          }
         }
+        if (foundInThisIndex) break;
       }
       if (foundInThisIndex) continue;
 
-      // Check Video
-      for (const ext of videoExts) {
-        const candidate = `${folderPath}${i}_video.${ext}`;
-        if (await checkResourceExists(candidate, 'video')) {
-          rawItems.push({ type: 'video', url: candidate, index: i });
-          foundInThisIndex = true;
-          break;
+      // 4. Check Audio
+      for (const suffix of suffixes) {
+        for (const ext of audioExts) {
+          const candidate = `${folderPath}${i}_audio${suffix}.${ext}`;
+          if (await checkResourceExists(candidate, 'audio')) {
+            rawItems.push({ type: 'audio', url: candidate, index: i });
+            foundInThisIndex = true;
+            break;
+          }
         }
-      }
-      if (foundInThisIndex) continue;
-
-      // Check Audio
-      for (const ext of audioExts) {
-        const candidate = `${folderPath}${i}_audio.${ext}`;
-        if (await checkResourceExists(candidate, 'audio')) {
-          rawItems.push({ type: 'audio', url: candidate, index: i });
-          foundInThisIndex = true;
-          break;
-        }
+        if (foundInThisIndex) break;
       }
 
-      // Detener si en el índice actual no existe ningún archivo con el prefijo i_
       if (!foundInThisIndex) break;
     }
 
@@ -220,7 +238,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
       rawItems.unshift({ type: 'text', content: poi.description, index: 0 });
     }
 
-    // Agrupar imágenes consecutivas en bloques de galería
     const blocks = [];
     let currentGallery = [];
 
@@ -333,8 +350,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   }
 
   const title = stationData?.title || poiData?.name || `Estación ${activeStationId}`;
-  const zoneName = poiData?.zone || 'Zona del Parque';
-  const icon = poiData?.icon || 'location_on';
 
   return (
     <div className="bg-[#fcfdfd] text-[#767775] font-sans antialiased min-h-screen pb-24">
