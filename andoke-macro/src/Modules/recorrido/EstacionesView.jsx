@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
-import AudioPlayer from '../../components/AudioPlayer'
+import AudioPlayer from '../../components/AudioPlayer';
 import VideoPlayer from '../../components/VideoPlayer';
 
 const CACHE_KEY = 'visited_stations_cache';
 const ROUTE_KEY = 'user_selected_route';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// Enlaces reales de reseñas
+const GOOGLE_REVIEWS_URL = 'https://search.google.com/local/writereview?placeid=ChIJvfSrd0CkMI4RjuZ8MKY7Sjc';
+const TRIPADVISOR_URL = 'https://www.tripadvisor.co/UserReviewEdit-g297475-d6966718-Mariposario_Andoke-Cali_Valle_del_Cauca_Department.html';
 
 // --- FUNCIONES AUXILIARES DE CACHÉ Y RUTA ---
 
@@ -82,7 +86,7 @@ const checkResourceExists = async (url, expectedType = 'image') => {
 
 // --- COMPONENTE PRINCIPAL ---
 
-export default function EstacionesView({ onNextStation, onNavigate }) {
+export default function EstacionesView({ onNavigate }) {
   const { language, langSuffixes } = useDeviceLanguage('es');
 
   const [activeStationId, setActiveStationId] = useState(() => {
@@ -96,10 +100,12 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [visitedStations, setVisitedStations] = useState([]);
 
-  // Control de desviación de ruta
+  // Modales
   const [showDeviationModal, setShowDeviationModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [rating, setRating] = useState(0);
 
-  // Guardamos POIS y STATIONS globales
+  // Estados globales de POIs y STATIONS
   const [allPois, setAllPois] = useState([]);
   const [allStations, setAllStations] = useState([]);
   const [orderedBlocks, setOrderedBlocks] = useState([]);
@@ -185,7 +191,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
           };
         }
 
-        // Verificar si la estación escaneada pertenece a la ruta activa del usuario
         if (selectedPoiIds && foundStation) {
           const belongsToRoute = selectedPoiIds.includes(foundStation.poiId);
           if (!belongsToRoute) {
@@ -332,55 +337,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     setIsPlayingAudio(false);
   };
 
-  const toggleWebAudio = async (audioUrl) => {
-    if (isPlayingAudio && currentAudioUrlRef.current === audioUrl) {
-      stopAudio();
-      return;
-    }
-
-    try {
-      setIsLoadingAudio(true);
-
-      if (!audioContextRef.current) {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        audioContextRef.current = new AudioCtx();
-      }
-
-      const ctx = audioContextRef.current;
-      if (ctx.state === 'suspended') {
-        await ctx.resume();
-      }
-
-      stopAudio();
-
-      if (currentAudioUrlRef.current !== audioUrl || !audioBufferRef.current) {
-        const response = await fetch(audioUrl);
-        if (!response.ok) throw new Error('No se pudo descargar el archivo de audio');
-        const arrayBuffer = await response.arrayBuffer();
-        audioBufferRef.current = await ctx.decodeAudioData(arrayBuffer);
-        currentAudioUrlRef.current = audioUrl;
-      }
-
-      const source = ctx.createBufferSource();
-      source.buffer = audioBufferRef.current;
-      source.connect(ctx.destination);
-
-      source.onended = () => {
-        setIsPlayingAudio(false);
-      };
-
-      sourceNodeRef.current = source;
-      source.start(0);
-      setIsPlayingAudio(true);
-
-    } catch (err) {
-      console.error('Error decodificando audio:', err);
-      alert('No se pudo decodificar el archivo de audio.');
-    } finally {
-      setIsLoadingAudio(false);
-    }
-  };
-
   const handleBack = () => {
     window.history.back();
   };
@@ -391,16 +347,26 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
     }
   };
 
-  const handleFinishRoute = () => {
-    // Aquí puedes registrar el evento/enviar métricas en el futuro
+  const triggerFinishFlow = () => {
+    setShowFeedbackModal(true);
+  };
+
+  const completeRouteAndExit = () => {
+    localStorage.removeItem(CACHE_KEY)
+    localStorage.removeItem(ROUTE_KEY)
+    setShowFeedbackModal(false);
     if (typeof onNavigate === 'function') {
-      onNavigate('home');
-    } else {
-      window.location.href = '/';
+      onNavigate('inicio');
     }
   };
 
-  // Cálculo de progreso global para saber si completó el recorrido
+  const handleScanNext = () => {
+    if (typeof onNavigate === 'function') {
+      onNavigate('camara');
+    }
+  };
+
+  // Cálculo de progreso global de la ruta
   const selectedPoiIds = getUserSelectedPoiIds();
   const targetStations = selectedPoiIds
     ? allStations.filter((st) => selectedPoiIds.includes(st.poiId))
@@ -410,6 +376,89 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   const visitedIds = currentVisitedList.map((v) => v.id);
   const isRouteFinished = targetStations.length > 0 && targetStations.every((st) => visitedIds.includes(st.id));
 
+  // --- MODAL DE FEEDBACK ---
+  const FeedbackModal = () => (
+    <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
+      <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
+        
+        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 text-amber-500 mb-4 mx-auto">
+          <span className="material-symbols-outlined text-3xl">emoji_events</span>
+        </div>
+
+        <h3 className="font-bold text-xl text-gray-800 mb-1">¡Recorrido Completado!</h3>
+        <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+          ¿Qué tal fue tu experiencia hoy en Andoke? Califícanos para ayudarnos a mejorar.
+        </p>
+
+        {/* 5 Estrellas */}
+        <div className="flex justify-center items-center gap-2 mb-6">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(star)}
+              className="p-1 transition-transform transform active:scale-125 hover:scale-110 cursor-pointer focus:outline-none"
+            >
+              <span className={`material-symbols-outlined text-3xl transition-colors ${
+                star <= rating ? 'text-amber-400 fill-current' : 'text-gray-300'
+              }`}>
+                star
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* 4 o 5 Estrellas */}
+        {rating >= 4 && (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 mb-6 text-left animate-in fade-in duration-300">
+            <p className="text-xs font-semibold text-emerald-800 mb-3 text-center">
+              🎉 ¡Muchas gracias! Tu opinión nos ayuda a seguir creciendo. ¿Nos dejas tu reseña?
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <a
+                href={GOOGLE_REVIEWS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <span className="material-symbols-outlined text-base text-red-500">location_on</span>
+                Opinar en Google Reviews
+              </a>
+              <a
+                href={TRIPADVISOR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#00af87] text-white font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[#009674] transition-colors shadow-sm"
+              >
+                <span className="material-symbols-outlined text-base">reviews</span>
+                Opinar en TripAdvisor
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* 1, 2 o 3 Estrellas */}
+        {rating > 0 && rating <= 3 && (
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6 animate-in fade-in duration-300">
+            <p className="text-xs text-gray-600">
+              Gracias por tus comentarios. Seguiremos trabajando continuamente para brindarte una mejor experiencia.
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={completeRouteAndExit}
+            className="w-full py-3.5 px-6 rounded-full bg-[#e63946] text-white font-bold text-sm hover:bg-[#db313f] transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            {rating >= 4 ? 'Listo, salir' : rating > 0 ? 'Enviar y finalizar' : 'Omitir y finalizar'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+
   // --- VISTA GENERAL (PROGRESO DEL RECORRIDO) ---
   if (!activeStationId) {
     const pendingStations = targetStations.filter((st) => !visitedIds.includes(st.id));
@@ -417,6 +466,9 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
 
     return (
       <div className="min-h-screen bg-[#fcfdfd] flex flex-col items-center justify-start p-6 font-sans pt-10 pb-28 max-w-md mx-auto relative">
+        
+        {showFeedbackModal && <FeedbackModal />}
+
         <div className="w-14 h-14 bg-rose-100 text-[#e63946] rounded-full flex items-center justify-center mb-3 shadow-sm">
           <span className="material-symbols-outlined text-2xl">map</span>
         </div>
@@ -442,13 +494,23 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
           </div>
         </div>
 
-        <button
-          onClick={() => onNavigate && onNavigate('camara')}
-          className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8"
-        >
-          <span className="material-symbols-outlined text-base">photo_camera</span>
-          Escanear Estación
-        </button>
+        {isRouteFinished ? (
+          <button
+            onClick={triggerFinishFlow}
+            className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8 transform active:scale-95"
+          >
+            <span className="material-symbols-outlined text-base">flag</span>
+            TERMINAR RECORRIDO
+          </button>
+        ) : (
+          <button
+            onClick={handleScanNext}
+            className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8 transform active:scale-95"
+          >
+            <span className="material-symbols-outlined text-base">photo_camera</span>
+            Continuar Escaneando
+          </button>
+        )}
 
         {pendingStations.length > 0 && (
           <div className="w-full text-left mb-6">
@@ -493,7 +555,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
             </h3>
             <div className="flex flex-col gap-2">
               {visitedInRoute.map((st) => {
-                const visitedInfo = visitedIds.includes(st.id);
                 return (
                   <button
                     key={st.id}
@@ -520,21 +581,6 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
             </div>
           </div>
         )}
-
-        {/* Botón flotante al haber completado la ruta en la vista general */}
-        {isRouteFinished && (
-          <div className="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[#fcfdfd] via-[#fcfdfd]/90 to-transparent z-40">
-            <div className="max-w-md mx-auto">
-              <button
-                onClick={handleFinishRoute}
-                className="w-full py-4 rounded-full bg-[#e63946] text-white font-bold text-sm shadow-lg hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 transform active:scale-95 duration-200 cursor-pointer"
-              >
-                <span className="material-symbols-outlined">flag</span>
-                TERMINAR RECORRIDO
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -557,7 +603,9 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
   return (
     <div className="bg-[#fcfdfd] text-[#767775] font-sans antialiased min-h-screen pb-28 relative">
 
-      {/* MODAL FLOTANTE DE ADVERTENCIA (DESVÍO DE RUTA) */}
+      {showFeedbackModal && <FeedbackModal />}
+
+      {/* MODAL FLOTANTE DE ADVERTENCIA */}
       {showDeviationModal && (
         <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
@@ -611,7 +659,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         <div className="w-10"></div>
       </header>
 
-      {/* CONTENIDO PRINCIPAL DE LA ESTACIÓN */}
+      {/* CONTENIDO PRINCIPAL */}
       <main className="pt-20 pb-8 md:max-w-3xl md:mx-auto">
         <div className="px-4 mb-6">
           <h1 className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em]">
@@ -620,10 +668,7 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
         </div>
 
         {orderedBlocks.map((block, idx) => {
-
-
           if (block.type === 'text') {
-            // Separamos el contenido por líneas
             const lines = block.content.split('\n');
 
             return (
@@ -631,9 +676,8 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
                 {lines.map((line, lineIdx) => {
                   const trimmedLine = line.trim();
 
-                  // Si la línea comienza con # (ejemplo: "# Mi Título")
                   if (trimmedLine.startsWith('#')) {
-                    const titleText = trimmedLine.replace(/^#+\s*/, ''); // Extrae el símbolo # y los espacios iniciales
+                    const titleText = trimmedLine.replace(/^#+\s*/, '');
 
                     return (
                       <h1
@@ -645,12 +689,10 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
                     );
                   }
 
-                  // Si es una línea vacía, mantenemos el espacio visual
                   if (!trimmedLine) {
                     return <div key={lineIdx} className="h-2" />;
                   }
 
-                  // El resto del texto normal
                   return (
                     <p
                       key={lineIdx}
@@ -670,10 +712,9 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
               <div key={`gallery-${idx}`} className="px-4 mb-8">
                 <div className={isSingle ? "w-full" : "grid grid-cols-2 gap-3"}>
                   {block.items.map((imgSrc, imgIdx) => {
-                    // Alterna esquinas según si el índice es par o impar
                     const organicCorners = imgIdx % 2 === 0
-                      ? 'rounded-tl-3xl rounded-br-3xl' // Arriba-Izquierda e Inferior-Derecha
-                      : 'rounded-tr-3xl rounded-bl-3xl'; // Arriba-Derecha e Inferior-Izquierda
+                      ? 'rounded-tl-3xl rounded-br-3xl'
+                      : 'rounded-tr-3xl rounded-bl-3xl';
 
                     return (
                       <div
@@ -716,15 +757,23 @@ export default function EstacionesView({ onNextStation, onNavigate }) {
 
       {/* FOOTER FLOTANTE */}
       <div className="fixed bottom-16 left-0 w-full bg-[#fcfdfd]/95 backdrop-blur-md border-t border-gray-100 p-4 z-50 flex justify-center">
-        {/*isRouteFinished*/ true &&
-        <button
-            onClick={handleFinishRoute}
+        {isRouteFinished ? (
+          <button
+            onClick={triggerFinishFlow}
             className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">flag</span>
             TERMINAR RECORRIDO
           </button>
-        }
+        ) : (
+          <button
+            onClick={handleScanNext}
+            className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
+          >
+            <span className="material-symbols-outlined text-base">photo_camera</span>
+            CONTINUAR ESCANEANDO
+          </button>
+        )}
       </div>
     </div>
   );

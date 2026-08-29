@@ -82,8 +82,8 @@ export default function AboutProjectView({ onNavigate }) {
                 <span className="material-symbols-outlined text-2xl">local_florist</span>
               </div>
               <div>
-                <h2 className="text-base font-bold text-gray-800">Andoke Casa de la Mariposa</h2>
-                <span className="text-xs text-emerald-700 font-semibold">Mariposario & Centro de Ciencias</span>
+                <h2 className="text-base font-bold text-gray-800">Andoke</h2>
+                <span className="text-xs text-emerald-700 font-semibold">Mariposario y Centro de Ciencias</span>
               </div>
             </div>
             
