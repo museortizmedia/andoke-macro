@@ -1,0 +1,6 @@
+app.andoke.com.co {
+    root * "C:/Users/Aux Contable y Admin/Documents/Tecnología/andoke-macro/andoke-macro/dist"
+    try_files {path} /index.html
+    file_server
+    tls "C:/Certbot/live/app.andoke.com.co/fullchain.pem" "C:/Certbot/live/app.andoke.com.co/privkey.pem"
+}
