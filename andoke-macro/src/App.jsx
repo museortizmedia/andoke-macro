@@ -10,6 +10,7 @@ import { NotFoundPage } from './components/NotFoundPage';
 import { scannerService } from './services/scannerService';
 import EstacionesView from './Modules/recorrido/EstacionesView';
 import AboutProjectView from './Modules/macro/AboutProjectView';
+import { FloatingMenu } from './components/FloatingMenu';
 
 // Extrae el segmento principal de la ruta
 const getScreenFromPath = () => {
@@ -107,6 +108,9 @@ function MainAppContent() {
   return (
     <div className="relative min-h-screen bg-[#fcfdfd]">
       {renderScreen()}
+
+      <FloatingMenu />
+
       {!hideBottomNav && (
         <BottomNav activeTab={currentScreen} onNavigate={handleNavigate} />
       )}

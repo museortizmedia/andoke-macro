@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { scannerService } from '../../services/scannerService';
+import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
 
 // --------------------------------------------------------------------------
 // LISTADO DE PRUEBAS EN CÓDIGO
@@ -33,6 +34,8 @@ const getMobileOS = () => {
 };
 
 export const CameraScanner = ({ onNavigate }) => {
+  const { t } = useDeviceLanguage();
+
   const [cameraState, setCameraState] = useState('prompt'); // 'prompt' | 'granted' | 'denied'
   const [errorMessage, setErrorMessage] = useState('');
   const [fileError, setFileError] = useState('');
@@ -101,7 +104,7 @@ export const CameraScanner = ({ onNavigate }) => {
     } else {
       setFileError(result.error || 'No se pudo leer el código QR de la imagen.');
     }
-    
+
     e.target.value = '';
   };
 
@@ -123,9 +126,9 @@ export const CameraScanner = ({ onNavigate }) => {
 
       {/* Encabezado */}
       <div className="w-full max-w-md text-center mt-4">
-        <h1 className="text-2xl font-extrabold text-[#767775]">Escáner</h1>
+        <h1 className="text-2xl font-extrabold text-[#767775]">{t("Escáner")}</h1>
         <p className="text-xs text-[#767775]/80 mt-1">
-          Apunta con la cámara al QR o acerca tu celular a una estación
+          {t("Apunta con la cámara al QR o acerca tu celular a una estación")}
         </p>
       </div>
 
@@ -149,12 +152,12 @@ export const CameraScanner = ({ onNavigate }) => {
               <span className="material-symbols-outlined text-4xl text-rose-500 mb-2">
                 videocam_off
               </span>
-              <p className="text-xs text-gray-600 mb-4">{errorMessage}</p>
+              <p className="text-xs text-gray-600 mb-4">{t(errorMessage)}</p>
               <button
                 onClick={initCamera}
                 className="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-md hover:bg-emerald-700 transition-all cursor-pointer"
               >
-                Reintentar
+                {t("Reintentar")}
               </button>
             </div>
           )}
@@ -176,11 +179,11 @@ export const CameraScanner = ({ onNavigate }) => {
           className="hidden md:flex w-full max-w-[280px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold text-xs py-2.5 px-4 rounded-xl shadow-sm items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-base text-emerald-600">upload_file</span>
-          Subir imagen QR desde equipo
+          {t("Subir imagen QR desde equipo")}
         </button>
 
         {fileError && (
-          <p className="hidden md:block text-[11px] font-medium text-rose-600 text-center px-4">{fileError}</p>
+          <p className="hidden md:block text-[11px] font-medium text-rose-600 text-center px-4">{t(fileError)}</p>
         )}
 
         {/* Módulo Informativo NFC condicionado al S.O. y soporte técnico */}
@@ -190,15 +193,17 @@ export const CameraScanner = ({ onNavigate }) => {
           </div>
           <div className="text-left">
             <h3 className="text-xs font-bold text-emerald-900">
-              Lectura NFC {hasWebNFC ? 'Activa' : 'Informativa'}
+              {t("Lectura NFC")}
             </h3>
             <p className="text-[11px] text-emerald-700/80 leading-snug">
-              {deviceOS === 'iOS' ? (
-                'Acerca la parte superior de tu IPhone a la etiqueta de la estación'
+              {t(
+                deviceOS === 'iOS' ? (
+                'Acerca la parte superior de tu IPhone a la etiqueta de la estación.'
               ) : deviceOS === 'Android' ? (
                 'Acerca la parte trasera de tu Android a la etiqueta de la estación.'
               ) : (
-                'Lectura NFC optimizada para dispositivos móviles Android con NFC habilitado.'
+                'Este dispositivo no tiene lector NFC.'
+              )
               )}
             </p>
           </div>
@@ -207,7 +212,7 @@ export const CameraScanner = ({ onNavigate }) => {
         {/* SELECTOR DE CÓDIGOS PARA PRUEBAS (Solo en pantallas PC) */}
         <div className="hidden md:flex w-full p-3 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col items-center gap-2 text-center mt-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
-            Pruebas Rápidas
+            {t("Pruebas Rápidas")}
           </span>
           <select
             onChange={handleSimulateSelect}
@@ -215,7 +220,7 @@ export const CameraScanner = ({ onNavigate }) => {
             className="w-full bg-white border border-amber-300 text-amber-900 text-xs font-semibold py-2 px-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
           >
             <option value="" disabled>
-              -- Selecciona un QR para simular --
+              {t("-- Selecciona un QR para simular --")}
             </option>
             {DEV_TEST_CODES.map((item, index) => (
               <option key={index} value={item.value}>

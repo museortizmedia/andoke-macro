@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
+import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
 
 export default function AboutProjectView({ onNavigate }) {
+  const { t } = useDeviceLanguage();
+
   // Inyección de estilos y fuentes
   useEffect(() => {
     const linkFonts = document.createElement('link');
@@ -43,7 +46,7 @@ export default function AboutProjectView({ onNavigate }) {
 
         <div className="flex-1 px-4 flex flex-col items-center">
           <span className="text-xs font-semibold text-[#767775] uppercase tracking-widest">
-            Créditos & Información
+            {t("Créditos & Información")}
           </span>
         </div>
 
@@ -57,20 +60,18 @@ export default function AboutProjectView({ onNavigate }) {
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#4ea8de]/15 border border-[#4ea8de]/30 text-[#4ea8de] text-xs font-semibold">
               <span className="material-symbols-outlined text-[14px] mr-1">eco</span>
-              Museografía Interactiva
+              {t("Museografía Interactiva")}
             </span>
           </div>
           <h1 className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em]">
-            Guía Digital Andoke
+            {t("Guía Digital Andoke")}
           </h1>
         </div>
 
         {/* Descripción del Proyecto */}
         <div className="px-4 mb-6">
           <p className="text-base leading-6 text-[#767775] font-normal whitespace-pre-line">
-            Esta plataforma web e infraestructura de museografía digital fue desarrollada para potenciar la experiencia pedagógica e interactiva dentro de Andoke.
-            {"\n\n"}
-            Integrando tecnología Web y puntos de contacto presenciales (QR y NFC), permite a los visitantes descubrir el mariposario, el centro de ciencias y los senderos ecológicos a través de contenidos multimedia ordenados dinámicamente.
+            {t("Esta plataforma web e infraestructura de museografía digital fue desarrollada para potenciar la experiencia pedagógica e interactiva dentro de Andoke.\n\nIntegrando tecnología Web y puntos de contacto presenciales (QR y NFC), permite a los visitantes descubrir el mariposario, el centro de ciencias y los senderos ecológicos a través de contenidos multimedia ordenados dinámicamente.")}
           </p>
         </div>
 
@@ -83,12 +84,14 @@ export default function AboutProjectView({ onNavigate }) {
               </div>
               <div>
                 <h2 className="text-base font-bold text-gray-800">Andoke</h2>
-                <span className="text-xs text-emerald-700 font-semibold">Mariposario y Centro de Ciencias</span>
+                <span className="text-xs text-emerald-700 font-semibold">
+                  {t("Mariposario y Centro de Ciencias")}
+                </span>
               </div>
             </div>
             
             <p className="text-xs leading-5 text-gray-600">
-              Ubicado en Cali, Colombia. Un espacio dedicado a la educación ambiental, la conservación de lepidópteros y la reconexión con la naturaleza a través de experiencias biológicas y senderos interactivos.
+              {t("Ubicado en Cali, Colombia. Un espacio dedicado a la educación ambiental, la conservación de lepidópteros y la reconexión con la naturaleza a través de experiencias biológicas y senderos interactivos.")}
             </p>
 
             <a
@@ -97,7 +100,7 @@ export default function AboutProjectView({ onNavigate }) {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-between w-full p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/70 transition-colors border border-emerald-100 text-xs font-bold text-emerald-800 group"
             >
-              <span>Visitar sitio web oficial</span>
+              <span>{t("Visitar sitio web oficial")}</span>
               <span className="material-symbols-outlined text-sm group-hover:translate-x-0.5 transition-transform">
                 open_in_new
               </span>
@@ -119,7 +122,7 @@ export default function AboutProjectView({ onNavigate }) {
             </div>
 
             <p className="text-xs leading-5 text-gray-600">
-              Dirección técnica, arquitectura de software y desarrollo de instalaciones interactivas. Especialista en la integración de aplicaciones web, motores de juego y hardware para experiencias inmersivas.
+              {t("Dirección técnica, arquitectura de software y desarrollo de instalaciones interactivas. Especialista en la integración de aplicaciones web, motores de juego y hardware para experiencias inmersivas.")}
             </p>
 
             <a
@@ -128,7 +131,7 @@ export default function AboutProjectView({ onNavigate }) {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-between w-full p-3 rounded-xl bg-sky-50 hover:bg-sky-100/70 transition-colors border border-sky-100 text-xs font-bold text-[#006590] group"
             >
-              <span>Ver portafolio de proyectos</span>
+              <span>{t("Ver portafolio de proyectos")}</span>
               <span className="material-symbols-outlined text-sm group-hover:translate-x-0.5 transition-transform">
                 open_in_new
               </span>
@@ -143,7 +146,7 @@ export default function AboutProjectView({ onNavigate }) {
           onClick={handleBack}
           className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer"
         >
-          Volver al Mapa
+          {t("Volver al Mapa")}
           <span className="material-symbols-outlined text-base">map</span>
         </button>
       </div>

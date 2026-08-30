@@ -1,6 +1,9 @@
 import React from 'react';
+import { useDeviceLanguage } from '../hooks/useDeviceLanguage';
 
 export const BottomNav = ({ activeTab, onNavigate }) => {
+  const { t } = useDeviceLanguage();
+
   const navItems = [
     { key: 'inicio', label: 'Inicio', icon: 'home' },
     { key: 'mapa', label: 'Mapa', icon: 'map' },
@@ -27,7 +30,7 @@ export const BottomNav = ({ activeTab, onNavigate }) => {
             >
               {item.icon}
             </span>
-            <span className="text-[11px] mt-0.5">{item.label}</span>
+            <span className="text-[11px] mt-0.5">{t(item.label)}</span>
           </button>
         );
       })}

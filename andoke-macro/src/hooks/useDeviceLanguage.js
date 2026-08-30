@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { translations } from '../utils/translations'; // Ajusta la ruta a tu archivo de diccionario
 
 export function useDeviceLanguage(defaultLang = 'es') {
   const [language, setLanguage] = useState(() => {
@@ -16,10 +17,21 @@ export function useDeviceLanguage(defaultLang = 'es') {
     return () => window.removeEventListener('languagechange', handleLanguageChange);
   }, [defaultLang]);
 
+  // Función t("Texto") que ya conoce el idioma actual
+  const t = useCallback(
+    (text) => {
+      if (language === 'es' || !translations[text]) {
+        return text;
+      }
+      return translations[text][language] || text;
+    },
+    [language]
+  );
+
   return {
     language,
     isSpanish: language === 'es',
-    // Retorna la lista de sufijos priorizada: ['_en', ''] si es 'en', o [''] si es 'es'
-    langSuffixes: language !== 'es' ? [`_${language}`, ''] : ['']
+    langSuffixes: language !== 'es' ? [`_${language}`, ''] : [''],
+    t // para traducir textos
   };
 }

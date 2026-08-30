@@ -87,7 +87,7 @@ const checkResourceExists = async (url, expectedType = 'image') => {
 // --- COMPONENTE PRINCIPAL ---
 
 export default function EstacionesView({ onNavigate }) {
-  const { language, langSuffixes } = useDeviceLanguage('es');
+  const { language, langSuffixes, t } = useDeviceLanguage('es');
 
   const [activeStationId, setActiveStationId] = useState(() => {
     return new URLSearchParams(window.location.search).get('id');
@@ -378,16 +378,16 @@ export default function EstacionesView({ onNavigate }) {
 
   // --- MODAL DE FEEDBACK ---
   const FeedbackModal = () => (
-    <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
+    <div className="fixed z-30 inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 transition-opacity duration-300">
       <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
         
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 text-amber-500 mb-4 mx-auto">
           <span className="material-symbols-outlined text-3xl">emoji_events</span>
         </div>
 
-        <h3 className="font-bold text-xl text-gray-800 mb-1">¡Recorrido Completado!</h3>
+        <h3 className="font-bold text-xl text-gray-800 mb-1">{t("¡Recorrido Completado!")}</h3>
         <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-          ¿Qué tal fue tu experiencia hoy en Andoke? Califícanos para ayudarnos a mejorar.
+          {t("¿Qué tal fue tu experiencia hoy en Andoke? Califícanos para ayudarnos a mejorar.")}
         </p>
 
         {/* 5 Estrellas */}
@@ -412,7 +412,7 @@ export default function EstacionesView({ onNavigate }) {
         {rating >= 4 && (
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 mb-6 text-left animate-in fade-in duration-300">
             <p className="text-xs font-semibold text-emerald-800 mb-3 text-center">
-              🎉 ¡Muchas gracias! Tu opinión nos ayuda a seguir creciendo. ¿Nos dejas tu reseña?
+              🎉 {t("¡Muchas gracias! Tu opinión nos ayuda a seguir creciendo. ¿Nos dejas tu reseña?")}
             </p>
             <div className="flex flex-col gap-2.5">
               <a
@@ -422,7 +422,7 @@ export default function EstacionesView({ onNavigate }) {
                 className="w-full py-2.5 px-4 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
               >
                 <span className="material-symbols-outlined text-base text-red-500">location_on</span>
-                Opinar en Google Reviews
+                {t("Opinar en Google Reviews")}
               </a>
               <a
                 href={TRIPADVISOR_URL}
@@ -431,7 +431,7 @@ export default function EstacionesView({ onNavigate }) {
                 className="w-full py-2.5 px-4 rounded-xl bg-[#00af87] text-white font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[#009674] transition-colors shadow-sm"
               >
                 <span className="material-symbols-outlined text-base">reviews</span>
-                Opinar en TripAdvisor
+                {t("Opinar en TripAdvisor")}
               </a>
             </div>
           </div>
@@ -441,7 +441,7 @@ export default function EstacionesView({ onNavigate }) {
         {rating > 0 && rating <= 3 && (
           <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6 animate-in fade-in duration-300">
             <p className="text-xs text-gray-600">
-              Gracias por tus comentarios. Seguiremos trabajando continuamente para brindarte una mejor experiencia.
+              {t("Gracias por tus comentarios. Seguiremos trabajando continuamente para brindarte una mejor experiencia.")}
             </p>
           </div>
         )}
@@ -451,7 +451,7 @@ export default function EstacionesView({ onNavigate }) {
             onClick={completeRouteAndExit}
             className="w-full py-3.5 px-6 rounded-full bg-[#e63946] text-white font-bold text-sm hover:bg-[#db313f] transition-all shadow-md active:scale-95 cursor-pointer"
           >
-            {rating >= 4 ? 'Listo, salir' : rating > 0 ? 'Enviar y finalizar' : 'Omitir y finalizar'}
+            {t( rating >= 4 ? 'Listo, salir' : rating > 0 ? 'Enviar y finalizar' : 'Omitir y finalizar' )}
           </button>
         </div>
 
@@ -472,25 +472,25 @@ export default function EstacionesView({ onNavigate }) {
         <div className="w-14 h-14 bg-rose-100 text-[#e63946] rounded-full flex items-center justify-center mb-3 shadow-sm">
           <span className="material-symbols-outlined text-2xl">map</span>
         </div>
-        <h2 className="text-xl font-bold text-gray-800 mb-1">Tu Progreso del Recorrido</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-1">{t("Tu Progreso del Recorrido")}</h2>
         <p className="text-xs text-gray-500 max-w-xs mb-6 text-center">
-          Escanea un código QR en cada punto para desbloquear la guía interactiva.
+          {t("Escanea un código QR o NFC en cada punto para desbloquear la guía interactiva.")}
         </p>
 
         <div className="w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm mb-6 flex items-center justify-around">
           <div className="text-center">
             <span className="text-2xl font-black text-[#4ea8de]">{visitedInRoute.length}</span>
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Vistas</p>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">{t("Vistas")}</p>
           </div>
           <div className="h-8 w-[1px] bg-gray-100"></div>
           <div className="text-center">
             <span className="text-2xl font-black text-[#e63946]">{pendingStations.length}</span>
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Faltantes</p>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">{t("Faltantes")}</p>
           </div>
           <div className="h-8 w-[1px] bg-gray-100"></div>
           <div className="text-center">
             <span className="text-2xl font-black text-gray-700">{targetStations.length}</span>
-            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">En Ruta</p>
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">{t("En Ruta")}</p>
           </div>
         </div>
 
@@ -500,7 +500,7 @@ export default function EstacionesView({ onNavigate }) {
             className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8 transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">flag</span>
-            TERMINAR RECORRIDO
+            {t("TERMINAR RECORRIDO")}
           </button>
         ) : (
           <button
@@ -508,7 +508,7 @@ export default function EstacionesView({ onNavigate }) {
             className="w-full bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg hover:bg-[#db313f] transition-all cursor-pointer flex items-center justify-center gap-2 mb-8 transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">photo_camera</span>
-            Continuar Escaneando
+            {t("Continuar Escaneando")}
           </button>
         )}
 
@@ -516,7 +516,7 @@ export default function EstacionesView({ onNavigate }) {
           <div className="w-full text-left mb-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-base text-[#e63946]">pending_actions</span>
-              Estaciones Pendientes por Visitar
+              {t("Estaciones Pendientes por Visitar")}
             </h3>
             <div className="flex flex-col gap-2">
               {pendingStations.map((st) => {
@@ -531,14 +531,14 @@ export default function EstacionesView({ onNavigate }) {
                         {st.numeroConsecutivo}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-700">{st.title}</p>
+                        <p className="text-sm font-semibold text-gray-700">{t(st.title)}</p>
                         <span className="text-[10px] text-gray-400">
-                          {parentPoi?.name || 'Ubicación'}
+                          {t(parentPoi?.name || 'Ubicación')}
                         </span>
                       </div>
                     </div>
                     <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                      Pendiente
+                      {t("Pendiente")}
                     </span>
                   </div>
                 );
@@ -551,7 +551,7 @@ export default function EstacionesView({ onNavigate }) {
           <div className="w-full text-left">
             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-base text-[#4ea8de]">task_alt</span>
-              Estaciones Visitadas (Últimas 24h)
+              {t("Estaciones Visitadas (Últimas 24h)")}
             </h3>
             <div className="flex flex-col gap-2">
               {visitedInRoute.map((st) => {
@@ -567,9 +567,9 @@ export default function EstacionesView({ onNavigate }) {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-800 group-hover:text-[#4ea8de] transition-colors">
-                          {st.title}
+                          {t(st.title)}
                         </p>
-                        <span className="text-[10px] text-emerald-600 font-semibold">Completado</span>
+                        <span className="text-[10px] text-emerald-600 font-semibold">{t("Completado")}</span>
                       </div>
                     </div>
                     <span className="material-symbols-outlined text-gray-400 group-hover:text-[#4ea8de] text-sm">
@@ -592,7 +592,7 @@ export default function EstacionesView({ onNavigate }) {
           <span className="material-symbols-outlined animate-spin text-4xl text-[#e63946]">
             progress_activity
           </span>
-          <p className="text-sm font-semibold text-[#767775]">Cargando información de la estación...</p>
+          <p className="text-sm font-semibold text-[#767775]">{t("Cargando información de la estación...")}</p>
         </div>
       </div>
     );
@@ -612,22 +612,22 @@ export default function EstacionesView({ onNavigate }) {
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#4ea8de]/10 text-[#4ea8de] mb-4 mx-auto">
               <span className="material-symbols-outlined text-3xl">location_off</span>
             </div>
-            <h3 className="font-bold text-xl text-center text-[#767775] mb-2">Desvío de Ruta</h3>
+            <h3 className="font-bold text-xl text-center text-[#767775] mb-2">{t("Desvío de Ruta")}</h3>
             <p className="text-sm text-[#767775] text-center mb-8 leading-relaxed">
-              📍 Esta estación no está en tu ruta actual. ¿Deseas explorarla de todos modos o volver a tu ruta original?
+              📍 {t("Esta estación no está en tu ruta actual. ¿Deseas explorarla de todos modos o volver a tu ruta original?")}
             </p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleBack}
                 className="w-full py-3.5 px-6 rounded-full bg-[#e63946] text-white font-bold text-sm hover:bg-[#db313f] transition-colors shadow-sm active:scale-95 cursor-pointer"
               >
-                Volver a mi ruta
+                {t("Volver a mi ruta")}
               </button>
               <button
                 onClick={() => setShowDeviationModal(false)}
                 className="w-full py-3.5 px-6 rounded-full bg-gray-100 text-[#767775] font-bold text-sm hover:bg-gray-200 transition-colors active:scale-95 cursor-pointer"
               >
-                Explorar estación
+                {t("Explorar estación")}
               </button>
             </div>
           </div>
@@ -646,7 +646,7 @@ export default function EstacionesView({ onNavigate }) {
 
         <div className="flex-1 px-4 flex flex-col items-center">
           <span className="text-xs font-semibold text-[#4ea8de] uppercase tracking-wider mb-1">
-            Estación {currentIndex} de {totalStations}
+            {t("Estación")} {currentIndex} {t("de")} {totalStations}
           </span>
           <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
             <div
@@ -663,7 +663,7 @@ export default function EstacionesView({ onNavigate }) {
       <main className="pt-20 pb-8 md:max-w-3xl md:mx-auto">
         <div className="px-4 mb-6">
           <h1 className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em]">
-            {title}
+            {t(title)}
           </h1>
         </div>
 
@@ -684,7 +684,7 @@ export default function EstacionesView({ onNavigate }) {
                         key={lineIdx}
                         className="text-[28px] leading-[34px] font-bold text-[#e63946] -tracking-[0.01em] my-2"
                       >
-                        {titleText}
+                        {t(titleText)}
                       </h1>
                     );
                   }
@@ -746,7 +746,7 @@ export default function EstacionesView({ onNavigate }) {
           if (block.type === 'audio') {
             return (
               <div key={`audio-${idx}`} className="px-4 mb-8">
-                <AudioPlayer src={block.url} title="Escucha la Guía" />
+                <AudioPlayer src={block.url} title={t("Escucha la Guía")} />
               </div>
             );
           }
@@ -763,7 +763,7 @@ export default function EstacionesView({ onNavigate }) {
             className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">flag</span>
-            TERMINAR RECORRIDO
+            {t("TERMINAR RECORRIDO")}
           </button>
         ) : (
           <button
@@ -771,7 +771,7 @@ export default function EstacionesView({ onNavigate }) {
             className="w-full max-w-sm bg-[#e63946] text-white text-sm font-bold py-3.5 px-6 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-[#db313f] transition-all cursor-pointer transform active:scale-95"
           >
             <span className="material-symbols-outlined text-base">photo_camera</span>
-            CONTINUAR ESCANEANDO
+            {t("CONTINUAR ESCANEANDO")}
           </button>
         )}
       </div>

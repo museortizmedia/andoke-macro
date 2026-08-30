@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useDeviceLanguage } from "../../hooks/useDeviceLanguage"
 
 const DEFAULT_CENTER_COORDS = [
   { top: "45%", left: "45%" },
@@ -15,6 +16,8 @@ const DEFAULT_CENTER_COORDS = [
 const SELECTED_ROUTE_CACHE_KEY = 'user_selected_route';
 
 export const InteractiveMapContent = ({ onNavigate }) => {
+  const { t } = useDeviceLanguage();
+
   const [extendedPois, setExtendedPois] = useState([]);
   const [routesConfig, setRoutesConfig] = useState([]);
   const [selectedStationIds, setSelectedStationIds] = useState([]);
@@ -136,7 +139,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fcfdfd] text-[#767775]">
-        <p className="font-semibold text-sm animate-pulse">Cargando mapa interactivo...</p>
+        <p className="font-semibold text-sm animate-pulse">{t("Cargando mapa interactivo...")}</p>
       </div>
     );
   }
@@ -169,21 +172,21 @@ export const InteractiveMapContent = ({ onNavigate }) => {
           />
       </header>
 
-      {/* Buscador Móvil */}
-      <div className="md:hidden sticky top-0 z-40 bg-[#fcfdfd]/90 backdrop-blur-md px-4 pt-4 pb-4 border-b border-[#e4bebc]/20">
-        <div className="relative w-full">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#767775]">
-            search
-          </span>
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-[#e4bebc]/50 rounded-full py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#4ea8de] focus:ring-2 focus:ring-[#4ea8de]/20 transition-all shadow-sm"
-            placeholder="Buscar atracciones, zonas..."
-            type="text"
-          />
-        </div>
-      </div>
+      {/* Buscador Móvil (Altura reducida) */}
+<div className="md:hidden sticky top-0 z-40 bg-[#fcfdfd]/90 backdrop-blur-md px-4 py-2 border-b border-[#e4bebc]/20 flex items-center">
+  <div className="relative w-[85%] sm:w-[88%]">
+    <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#767775] text-xl">
+      search
+    </span>
+    <input
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      className="w-full bg-white border border-[#e4bebc]/50 rounded-full py-2 pl-10 pr-4 text-xs sm:text-sm focus:outline-none focus:border-[#4ea8de] focus:ring-2 focus:ring-[#4ea8de]/20 transition-all shadow-sm"
+      placeholder={t("Buscar atracciones, zonas...")}
+      type="text"
+    />
+  </div>
+</div>
 
       <main className="flex-1 w-full max-w-7xl mx-auto md:px-12 md:py-8 flex flex-col md:flex-row gap-8">
         {/* Columna Izquierda: Mapa e Interacciones */}
@@ -198,7 +201,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white border border-[#e4bebc]/50 rounded-full py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#4ea8de] focus:ring-2 focus:ring-[#4ea8de]/20 transition-all shadow-sm"
-              placeholder="Buscar atracciones, zonas..."
+              placeholder={t("Buscar atracciones, zonas...")}
               type="text"
             />
           </div>
@@ -246,7 +249,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
                           : "bg-gray-200/90 text-gray-500"
                         }`}
                     >
-                      {station.name}
+                      {t(station.name)}
                     </span>
                   </button>
                 );
@@ -257,7 +260,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
           {/* Rutas Sugeridas */}
           <div className="px-4 md:px-0 mt-2">
             <h3 className="font-bold text-xs text-[#767775] mb-2 uppercase tracking-wider">
-              Rutas Sugeridas
+              {t("Rutas Sugeridas")}
             </h3>
             <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
               {routesConfig.map((route) => {
@@ -270,7 +273,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
                       }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">{route.icon}</span>
-                    {route.title}
+                    {t(route.title)}
                   </button>
                 );
               })}
@@ -283,11 +286,11 @@ export const InteractiveMapContent = ({ onNavigate }) => {
           <div>
             <div className="flex justify-between items-end mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-[#767775]">Atracciones</h2>
-                <p className="text-xs text-[#767775]/70">Selecciona o quita lugares para definir recorrido personalizado</p>
+                <h2 className="text-2xl font-bold text-[#767775]">{t("Atracciones")}</h2>
+                <p className="text-xs text-[#767775]/70">{t("Selecciona o quita lugares para definir recorrido personalizado")}</p>
               </div>
               <span className="font-bold text-xs text-[#4ea8de] bg-[#4ea8de]/10 px-2.5 py-1 rounded-full whitespace-nowrap">
-                {selectedStationIds.length} de {selectableStations.length} Activas
+                {selectedStationIds.length} {t("de")} {selectableStations.length} {t("Activas")}
               </span>
             </div>
 
@@ -315,8 +318,8 @@ export const InteractiveMapContent = ({ onNavigate }) => {
                           {station.icon}
                         </span>
                         <div className="flex flex-col justify-center leading-tight">
-                          <h3 className="text-base font-bold text-[#767775] leading-none mb-0.5">{station.name}</h3>
-                          <span className="text-[10px] text-gray-400 font-semibold leading-none">{station.zone}</span>
+                          <h3 className="text-base font-bold text-[#767775] leading-none mb-0.5">{t(station.name)}</h3>
+                          <span className="text-[10px] text-gray-400 font-semibold leading-none">{t(station.zone)}</span>
                         </div>
                       </div>
                       <button className="text-[#e63946]">
@@ -337,7 +340,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
 
                     <div className="pt-2 border-t border-[#e2e3df]/30 flex items-center justify-between pl-1">
                       <span className="font-bold text-[10px] text-[#767775] uppercase tracking-wider">
-                        Tiempo estimado
+                        {t("Tiempo estimado")}
                       </span>
                       <span className="text-xs font-bold bg-[#f3f4f0] px-2.5 py-1 rounded-full text-[#767775]">
                         ~{station.duration} min
@@ -356,7 +359,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
               className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary hover:bg-[#db313f] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-              Guardar mi recorrido ({formattedTime()})
+              {t("Guardar mi recorrido")} ({formattedTime()})
             </button>
           </div>
         </div>
@@ -369,7 +372,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
           className="w-full bg-[#e63946] text-white font-bold text-sm py-4 rounded-full shadow-lg vibrant-glow-primary active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[20px]">directions_walk</span>
-          Guardar mi recorrido ({formattedTime()})
+          {t("Guardar mi recorrido")} ({formattedTime()})
         </button>
       </div>
     </div>
