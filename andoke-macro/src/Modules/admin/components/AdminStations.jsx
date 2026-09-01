@@ -495,7 +495,7 @@ export const AdminStations = () => {
                 } text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 transition-colors`}
             >
               <span className="material-symbols-outlined text-sm">folder_open</span>
-              {dirHandle ? 'Carpeta Conectada' : 'Vincular Carpeta public/'}
+              {dirHandle ? 'Carpeta Conectada' : 'Vincular Carpeta dist/'}
             </button>
 
             {hasPermission && (

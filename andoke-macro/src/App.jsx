@@ -109,7 +109,7 @@ function MainAppContent() {
     <div className="relative min-h-screen bg-[#fcfdfd]">
       {renderScreen()}
 
-      <FloatingMenu />
+      {(currentScreen !== 'admin') && <FloatingMenu />}
 
       {!hideBottomNav && (
         <BottomNav activeTab={currentScreen} onNavigate={handleNavigate} />
