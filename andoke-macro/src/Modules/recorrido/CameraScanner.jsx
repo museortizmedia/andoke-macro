@@ -6,7 +6,7 @@ import { useDeviceLanguage } from '../../hooks/useDeviceLanguage';
 // LISTADO DE PRUEBAS EN CÓDIGO
 // --------------------------------------------------------------------------
 const DEV_TEST_CODES = [
-  { label: 'Estación 01', value: 'EST-001' },
+  { label: 'Estación 01', value: 'https://app.andoke.com.co/estaciones?id=EST-001' },
   { label: 'Estación 02', value: 'EST-002' },
   { label: 'Estación 03', value: 'EST-003' },
   { label: 'Estación 04', value: 'EST-004' },
@@ -15,7 +15,15 @@ const DEV_TEST_CODES = [
   { label: 'Estación 07', value: 'EST-007' },
   { label: 'Estación 08', value: 'EST-008' },
   { label: 'Estación 09', value: 'EST-009' },
-  { label: 'Estación 01 URL', value: 'https://app.andoke.com.co/estaciones?id=EST-001' },
+  { label: 'Estación 10', value: 'EST-010' },
+  { label: 'Estación 11', value: 'EST-011' },
+  { label: 'Estación 12', value: 'EST-012' },
+  { label: 'Estación 13', value: 'EST-013' },
+  { label: 'Estación 14', value: 'EST-014' },
+  { label: 'Estación 15', value: 'EST-015' },
+  { label: 'Estación 16', value: 'EST-016' },
+  { label: 'Estación 17', value: 'EST-017' },
+  
   { label: 'Código Inválido / Error', value: 'CODIGO_DESCONOCIDO_123' }
 ];
 
