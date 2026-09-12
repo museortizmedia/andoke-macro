@@ -128,7 +128,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  const selectableStations = extendedPois.filter((s) => s.selectable);
+  const selectableStations = extendedPois/*.filter((s) => s.selectable)*/;
   const filteredStations = selectableStations.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -230,6 +230,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
                     disabled={!isSelectable}
                     className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto transition-transform ${isSelectable ? "cursor-pointer hover:scale-110" : "cursor-default opacity-85"
                       }`}
+                    title={t(station.description || station.name)}
                   >
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all ${!isSelectable
@@ -335,7 +336,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
                     </div>
 
                     <p className="text-xs text-[#767775]/80 pl-1 mb-3 line-clamp-2">
-                      {station.description}
+                      {t(station.description)}
                     </p>
 
                     <div className="pt-2 border-t border-[#e2e3df]/30 flex items-center justify-between pl-1">

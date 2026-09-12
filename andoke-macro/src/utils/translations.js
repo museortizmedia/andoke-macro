@@ -281,6 +281,44 @@ export const translations = {
         en: "Back to Map"
     },
 
+    //STATIONS DESCRIPTIONS
+    "Punto de bienvenida, información y souvenir ecológicos.":
+    {
+        en: "Welcome point, information and ecological souvenirs."
+    },
+    "Santuario de mariposas en vuelo libre y conservación de especies.":
+    {
+        en: "Sanctuary of butterflies in free flight and species conservation."
+    },
+    "Observación del ciclo de vida, metamorfosis y eclosión.":
+    {
+        en: "Observation of the life cycle, metamorphosis and hatching."
+    },
+    "Espacio para charlas, conferencias y proyecciones.":
+    {
+        en: "Space for talks, conferences and projections."
+    },
+    "Instalación topográfica a escala para explorar las regiones del país.":
+    {
+        en: "Topographical installation at scale to explore the regions of the country."
+    },
+    "Área de alojamiento e inmersión en la naturaleza.":
+    {
+        en: "Accommodation area and immersion in nature."
+    },
+    "Parqueadero general para vehículos.":
+    {
+        en: "General parking for vehicles."
+    },
+    "Servicios sanitarios.":
+    {
+        en: "Sanitary services."
+    },
+    "Estación de bebidas, snacks y descanso.":
+    {
+        en: "Beverage station, snacks and rest area."
+    },
+
     // Floating
     "Idioma": {
         en: "Language"

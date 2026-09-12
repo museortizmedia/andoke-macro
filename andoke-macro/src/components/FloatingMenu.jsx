@@ -4,7 +4,7 @@ import { useDeviceLanguage } from '../hooks/useDeviceLanguage';
 export function FloatingMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
-  const { language, t } = useDeviceLanguage();
+  const { language, changeLanguage, t } = useDeviceLanguage();
 
   const [formData, setFormData] = useState({
     type: 'felicitacion',
@@ -15,7 +15,6 @@ export function FloatingMenu() {
 
   const menuRef = useRef(null);
 
-  // Cerrar menú si el usuario hace clic fuera de él
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -39,16 +38,22 @@ export function FloatingMenu() {
     }, 2000);
   };
 
+  // Función para alternar el idioma
+  const toggleLanguage = () => {
+    const nextLang = language === 'es' ? 'en' : 'es';
+    changeLanguage(nextLang);
+  };
+
   return (
     <div ref={menuRef} className="fixed top-2.5 right-4 z-50">
-      {/* Botón de 3 Líneas (Menú Hamburguesa) */}
+      {/* Botón del Menú Hamburguesa */}
       <button
         onClick={() => {
           setIsOpen(!isOpen);
           if (isSuggestionOpen) setIsSuggestionOpen(false);
         }}
         aria-label="Abrir opciones"
-        className="flex h-10 w-10 items-center justify-center text-slate-700 transition-all hover:bg-slate-50 active:scale-95"
+        className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition-all hover:bg-slate-50 active:scale-95"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -69,13 +74,18 @@ export function FloatingMenu() {
       {/* Menú Desplegable Principal */}
       {isOpen && !isSuggestionOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-2 text-slate-800 shadow-xl backdrop-blur-md transition-all animate-fade-in-down">
-          {/* Indicador de Idioma */}
+          
+          {/* Botón Interactivo para Cambiar Idioma */}
           <div className="flex items-center justify-between px-3 py-2 text-xs font-semibold border-b border-slate-100 text-slate-600">
             <span>{t("Idioma")}:</span>
-            <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-slate-800">
+            <button
+              onClick={toggleLanguage}
+              title="Cambiar idioma / Change language"
+              className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1 text-slate-800 transition-all hover:bg-slate-200 active:scale-95"
+            >
               <span>{language === 'es' ? '🇪🇸' : '🇺🇸'}</span>
-              <span className="uppercase">{language}</span>
-            </div>
+              <span className="uppercase font-bold">{language}</span>
+            </button>
           </div>
 
           {/* Opción Buzón de Opiniones */}
@@ -102,7 +112,7 @@ export function FloatingMenu() {
         </div>
       )}
 
-      {/* Ventana Flotante del Formulario de Sugerencias */}
+      {/* Formulario de Sugerencias */}
       {isOpen && isSuggestionOpen && (
         <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-slate-100 bg-white p-4 text-slate-800 shadow-xl backdrop-blur-md transition-all">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
