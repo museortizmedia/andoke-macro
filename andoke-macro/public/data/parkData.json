@@ -1,6 +1,6 @@
 {
   "POIS": [
-        {
+    {
       "id": "recepcion_tienda",
       "name": "Recepción",
       "duration": 10,
@@ -39,7 +39,7 @@
         "left": "45%"
       }
     },
-        {
+    {
       "id": "auditorio",
       "name": "Auditorio",
       "duration": 10,
@@ -195,7 +195,7 @@
       "id": "EST-007",
       "numeroConsecutivo": 7,
       "poiId": "domo",
-      "title": "Bienvenida mariposario",
+      "title": "Mariposario",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-007/",
       "audioFile": "1_audio.m4a",
@@ -207,7 +207,7 @@
       "id": "EST-008",
       "numeroConsecutivo": 8,
       "poiId": "domo",
-      "title": "Mariposario 2",
+      "title": "La Tertulia",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-008/",
       "audioFile": "1_audio.m4a",
@@ -219,9 +219,105 @@
       "id": "EST-009",
       "numeroConsecutivo": 9,
       "poiId": "domo",
-      "title": "Mariposario cierre",
+      "title": "Terraza Superior",
       "estado": "activa",
       "contentFolderPath": "public/estaciones/EST-009/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-010",
+      "numeroConsecutivo": 10,
+      "poiId": "mapa_colombia",
+      "title": "Origen del Mapa de Colombia",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-010/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-011",
+      "numeroConsecutivo": 11,
+      "poiId": "mapa_colombia",
+      "title": "El Sur de los Andes y el Macizo",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-011/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-012",
+      "numeroConsecutivo": 12,
+      "poiId": "mapa_colombia",
+      "title": "El Pacífico y Chocó Biogeográfico",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-012/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-013",
+      "numeroConsecutivo": 13,
+      "poiId": "mapa_colombia",
+      "title": "Andes Centrales, Páramos y el Darién",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-013/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-014",
+      "numeroConsecutivo": 14,
+      "poiId": "mapa_colombia",
+      "title": "El Caribe, la Sierra Nevada y La Guajira",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-014/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-015",
+      "numeroConsecutivo": 15,
+      "poiId": "mapa_colombia",
+      "title": "Guatavita, Orinoquia y Escudo Guayanés",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-015/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-016",
+      "numeroConsecutivo": 16,
+      "poiId": "mapa_colombia",
+      "title": "La Amazonia y el Origen de Andoke",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-016/",
+      "audioFile": "1_audio.m4a",
+      "order": [
+        "audio"
+      ]
+    },
+    {
+      "id": "EST-017",
+      "numeroConsecutivo": 17,
+      "poiId": "mapa_colombia",
+      "title": "Cierre del Recorrido",
+      "estado": "activa",
+      "contentFolderPath": "public/estaciones/EST-017/",
       "audioFile": "1_audio.m4a",
       "order": [
         "audio"
