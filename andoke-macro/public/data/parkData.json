@@ -9,8 +9,8 @@
       "selectable": true,
       "icon": "storefront",
       "mapCoords": {
-        "top": "80%",
-        "left": "30%"
+        "top": "68%",
+        "left": "48%"
       }
     },
     {
@@ -22,21 +22,21 @@
       "selectable": true,
       "icon": "emoji_nature",
       "mapCoords": {
-        "top": "25%",
-        "left": "60%"
+        "top": "35%",
+        "left": "75%"
       }
     },
     {
       "id": "laboratorio",
-      "name": "Laboratorio",
+      "name": "Lab",
       "duration": 30,
       "zone": "Laboratorio",
       "description": "Observación del ciclo de vida, metamorfosis y eclosión.",
       "selectable": true,
       "icon": "science",
       "mapCoords": {
-        "top": "35%",
-        "left": "45%"
+        "top": "58%",
+        "left": "90%"
       }
     },
     {
@@ -48,8 +48,8 @@
       "selectable": true,
       "icon": "groups",
       "mapCoords": {
-        "top": "40%",
-        "left": "35%"
+        "top": "70%",
+        "left": "79%"
       }
     },
     {
@@ -61,34 +61,60 @@
       "selectable": true,
       "icon": "map",
       "mapCoords": {
-        "top": "65%",
-        "left": "50%"
+        "top": "68%",
+        "left": "25%"
       }
     },
     {
       "id": "cabanas",
-      "name": "Cabañas",
+      "name": "Acandí",
       "duration": 0,
       "zone": "Cabañas",
-      "description": "Área de alojamiento e inmersión en la naturaleza.",
+      "description": "Íntima, acogedora y apartada, perfecta para quienes buscan tranquilidad absoluta. Reserva en nuestro sitio web.",
       "selectable": false,
       "icon": "cabin",
       "mapCoords": {
-        "top": "45%",
-        "left": "75%"
+        "top": "90%",
+        "left": "8%"
+      }
+    },
+{
+      "id": "cabanas",
+      "name": "Tabatinga",
+      "duration": 0,
+      "zone": "Cabañas",
+      "description": "Luminosa y conectada con la naturaleza, ideal para disfrutar de las vistas y el aire fresco. Reserva en nuestro sitio web.",
+      "selectable": false,
+      "icon": "cabin",
+      "mapCoords": {
+        "top": "25%",
+        "left": "40%"
+      }
+    },
+{
+      "id": "cabanas",
+      "name": "Macuira",
+      "duration": 0,
+      "zone": "Cabañas",
+      "description": "Espaciosa y resguardada, pensada para ofrecer total comodidad y privacidad en grupo. Reserva en nuestro sitio web.",
+      "selectable": false,
+      "icon": "cabin",
+      "mapCoords": {
+        "top": "18%",
+        "left": "10%"
       }
     },
     {
       "id": "estacionamiento",
-      "name": "Estacionamiento",
+      "name": "Parking",
       "duration": 0,
       "zone": "Estacionamiento",
       "description": "Parqueadero general para vehículos.",
       "selectable": false,
       "icon": "local_parking",
       "mapCoords": {
-        "top": "90%",
-        "left": "15%"
+        "top": "87%",
+        "left": "43%"
       }
     },
     {
@@ -100,8 +126,8 @@
       "selectable": false,
       "icon": "wc",
       "mapCoords": {
-        "top": "60%",
-        "left": "40%"
+        "top": "77%",
+        "left": "66%"
       }
     },
     {
@@ -113,8 +139,8 @@
       "selectable": false,
       "icon": "restaurant",
       "mapCoords": {
-        "top": "55%",
-        "left": "65%"
+        "top": "48%",
+        "left": "44%"
       }
     }
   ],
