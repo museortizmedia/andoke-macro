@@ -212,7 +212,7 @@ export const InteractiveMapContent = ({ onNavigate }) => {
               className="absolute inset-0 bg-cover bg-center w-full h-full opacity-80 mix-blend-multiply"
               style={{
                 backgroundImage:
-                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjGbfOqiQM6wmgXWGOlNaF03MKSKi2H-0N_0SaoP06w9qtgalPr_u30QycCvB0JZC83eplydWmWrRvmws8JMFMLVUtgxAfGuoq9GtB96_WIW1ZnqoMEWowpyIYyKv8TI16aUSpft77EiElVs6CkO873DdF2Qm2JixV7zI2IvTvyUWkGaaDt4ETzrClzf9csQTR_CH-3hyQOUFgiqVSLVRK4w1B_HGgVnBjWVFg8y5Vdwt2F6dGqGCMzA')"
+                  "url('/MAPA_ANDOKE.webp')"
               }}
             />
 
