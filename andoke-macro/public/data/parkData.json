@@ -106,7 +106,7 @@
     },
     {
       "id": "estacionamiento",
-      "name": "Parking",
+      "name": "Estacionamiento",
       "duration": 0,
       "zone": "Estacionamiento",
       "description": "Parqueadero general para vehículos.",
@@ -132,9 +132,9 @@
     },
     {
       "id": "cafeteria",
-      "name": "Cafetería",
+      "name": "Restaurante",
       "duration": 0,
-      "zone": "Cafetería",
+      "zone": "Restaurante",
       "description": "Estación de bebidas, snacks y descanso.",
       "selectable": false,
       "icon": "restaurant",
