@@ -4,6 +4,7 @@ import { useDeviceLanguage } from '../hooks/useDeviceLanguage';
 export function FloatingMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { language, changeLanguage, t } = useDeviceLanguage();
 
   const [formData, setFormData] = useState({
@@ -14,6 +15,9 @@ export function FloatingMenu() {
   const [submitted, setSubmitted] = useState(false);
 
   const menuRef = useRef(null);
+
+  // URL del endpoint de respuesta de tu formulario de Google
+  const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScTZbKS_VpqDMnA2iUoS5maDks-r2QJVkARjN4UtqRe9ebNfw/formResponse";
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -26,19 +30,41 @@ export function FloatingMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Feedback enviado:', formData);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setIsSuggestionOpen(false);
-      setIsOpen(false);
-      setFormData({ type: 'felicitacion', email: '', message: '' });
-    }, 2000);
+    setIsSubmitting(true);
+
+    // Mapeo de los campos del estado a los entries de Google Forms
+    const formBody = new URLSearchParams();
+    formBody.append('entry.1689286979', formData.type);
+    formBody.append('entry.293290453', formData.email);
+    formBody.append('entry.1211313313', formData.message);
+
+    try {
+      // Usamos no-cors para evitar el bloqueo por política de mismo origen
+      await fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formBody.toString()
+      });
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Error enviando a Google Forms:', error);
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => {
+        setSubmitted(false);
+        setIsSuggestionOpen(false);
+        setIsOpen(false);
+        setFormData({ type: 'felicitacion', email: '', message: '' });
+      }, 2500);
+    }
   };
 
-  // Función para alternar el idioma
   const toggleLanguage = () => {
     const nextLang = language === 'es' ? 'en' : 'es';
     changeLanguage(nextLang);
@@ -170,9 +196,10 @@ export function FloatingMenu() {
 
               <button
                 type="submit"
-                className="mt-1 w-full rounded-lg bg-emerald-600 py-2 font-semibold text-white transition-colors hover:bg-emerald-700 active:bg-emerald-800 shadow-md"
+                disabled={isSubmitting}
+                className="mt-1 w-full rounded-lg bg-emerald-600 py-2 font-semibold text-white transition-colors hover:bg-emerald-700 active:bg-emerald-800 shadow-md disabled:opacity-50"
               >
-                {t("Enviar Reporte")}
+                {isSubmitting ? t("Enviando...") : t("Enviar Reporte")}
               </button>
             </form>
           )}
