@@ -80,8 +80,8 @@ export const translations = {
     "Baños": {
         en: "Restrooms"
     },
-    "Cafetería": {
-        en: "Café"
+    "Restaurante": {
+        en: "Restaurant"
     },
     // MAP ROUTES
     "Ruta Completa (Todas)": {
