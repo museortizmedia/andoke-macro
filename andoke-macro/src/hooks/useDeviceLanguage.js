@@ -1,12 +1,27 @@
 import { useSyncExternalStore, useCallback } from 'react';
 import { translations } from '../utils/translations';
 
+const STORAGE_KEY = 'app_user_language';
+
+// Resuelve la región del navegador a 'es' o 'en'
+const resolveSupportedLanguage = () => {
+  if (typeof navigator === 'undefined') return 'es';
+
+  // Toma el primer idioma preferido del navegador (ej. 'de-DE' o 'en-US')
+  const primaryLang = (navigator.languages?.[0] || navigator.language || 'es').toLowerCase();
+  
+  // Si empieza con 'es' (es, es-ES, es-CO, etc.) usa español, de lo contrario inglés
+  return primaryLang.startsWith('es') ? 'es' : 'en';
+};
+
 // 1. Estado fuera de React (Store Singleton)
 const getInitialLang = () => {
-  const savedLang = localStorage.getItem('app_user_language');
-  if (savedLang) return savedLang;
-  const rawLang = navigator.language || navigator.userLanguage || 'es';
-  return rawLang.split('-')[0].toLowerCase();
+  if (typeof window !== 'undefined') {
+    const savedLang = sessionStorage.getItem(STORAGE_KEY);
+    if (savedLang) return savedLang;
+  }
+  
+  return resolveSupportedLanguage();
 };
 
 let currentLanguage = getInitialLang();
@@ -26,8 +41,10 @@ const languageStore = {
     if (formattedLang === currentLanguage) return;
     
     currentLanguage = formattedLang;
-    localStorage.setItem('app_user_language', formattedLang);
-    // Notificar a todos los componentes suscritos para que se re-rendericen en masa
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(STORAGE_KEY, formattedLang);
+    }
+    
     listeners.forEach((callback) => callback());
   }
 };
@@ -35,16 +52,15 @@ const languageStore = {
 // Escuchar cambios de idioma del sistema/navegador automáticamente
 if (typeof window !== 'undefined') {
   window.addEventListener('languagechange', () => {
-    if (!localStorage.getItem('app_user_language')) {
-      const rawLang = navigator.language || navigator.userLanguage || 'es';
-      languageStore.setLanguage(rawLang.split('-')[0].toLowerCase());
+    // Solo actualiza automáticamente si el usuario no fijó manualmente un idioma en la sesión activa
+    if (!sessionStorage.getItem(STORAGE_KEY)) {
+      languageStore.setLanguage(resolveSupportedLanguage());
     }
   });
 }
 
 // 3. Custom Hook ultraligero
 export function useDeviceLanguage() {
-  // useSyncExternalStore sintoniza cualquier componente con el store global
   const language = useSyncExternalStore(
     languageStore.subscribe,
     languageStore.getSnapshot
@@ -66,7 +82,7 @@ export function useDeviceLanguage() {
 
   return {
     language,
-    changeLanguage, // Permite forzar el cambio desde cualquier componente
+    changeLanguage,
     isSpanish: language === 'es',
     langSuffixes: language !== 'es' ? [`_${language}`, ''] : [''],
     t
