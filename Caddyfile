@@ -1,6 +1,28 @@
+# ---------------------------------------------------
+# 1. SUBDOMINIO: APP (PROYECTO PRINCIPAL)
+# ---------------------------------------------------
 app.andoke.com.co {
     root * "C:/Users/Aux Contable y Admin/Documents/Tecnología/andoke-macro/andoke-macro/dist"
     try_files {path} /index.html
     file_server
-    tls "C:/Certbot/live/app.andoke.com.co/fullchain.pem" "C:/Certbot/live/app.andoke.com.co/privkey.pem"
+    tls "C:/Certbot/live/andoke.com.co/fullchain.pem" "C:/Certbot/live/andoke.com.co/privkey.pem"
+}
+
+# ---------------------------------------------------
+# 2. SUBDOMINIO: API (PROYECTO BACKEND / SERVICIO)
+# ---------------------------------------------------
+api.andoke.com.co {
+    root * "C:/Users/Aux Contable y Admin/Documents/Tecnología/andoke-macro/andoke-api/dist"
+    try_files {path} /index.html
+    file_server
+    tls "C:/Certbot/live/andoke.com.co/fullchain.pem" "C:/Certbot/live/andoke.com.co/privkey.pem"
+}
+
+# ---------------------------------------------------
+# 3. SUBDOMINIO: MQTT (BROKER MOSQUITTO VIA WEBSOCKETS)
+# ---------------------------------------------------
+mqtt.andoke.com.co {
+    # Redirige el tráfico seguro HTTPS/WSS al puerto local de Mosquitto
+    reverse_proxy localhost:8083
+    tls "C:/Certbot/live/andoke.com.co/fullchain.pem" "C:/Certbot/live/andoke.com.co/privkey.pem"
 }

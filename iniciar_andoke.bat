@@ -2,13 +2,15 @@
 title Servidor e Intranet - Parque Andoke
 color 0A
 
-:: 1. Guardar la ruta absoluta exacta donde se encuentra este archivo .bat
+:: 1. Guardar la ruta absoluta exacta del directorio padre
 set "PADRE_DIR=%~dp0"
 if "%PADRE_DIR:~-1%"=="\" set "PADRE_DIR=%PADRE_DIR:~0,-1%"
 
-:: Definir la ruta exacta del proyecto React (Doble carpeta según tu estructura)
+:: Definir rutas relativas de los proyectos
 set "REACT_DIR=%PADRE_DIR%\andoke-macro"
 set "DIST_DIR=%REACT_DIR%\dist"
+set "API_DIR=%PADRE_DIR%\andoke-api"
+set "MQTT_DIR=%PADRE_DIR%\andoke-mqtt"
 
 :: 2. Elevar Privilegios a Administrador
 net session >nul 2>&1
@@ -18,104 +20,100 @@ if %errorLevel% neq 0 (
     exit /b
 )
 
-:: ===================================================
-:: CONFIGURACIÓN DEL SERVIDOR
-:: ===================================================
+:: CONFIGURACIÓN DE PUERTOS
 set PUERTO_HTTP=80
 set PUERTO_HTTPS=443
-set NOMBRE_REGLA_HTTP="Servidor Intranet Andoke (Puerto %PUERTO_HTTP%)"
-set NOMBRE_REGLA_HTTPS="Servidor Intranet Andoke (Puerto %PUERTO_HTTPS%)"
+set PUERTO_MQTT_TCP=1883
+set PUERTO_MQTT_WS=8083
 
 echo ===================================================
 echo    INICIANDO DESPLIEGUE EN PRODUCCION - ANDOKE
 echo ===================================================
 echo.
 
-:: 3. Moverse forzosamente a la carpeta Padre (Donde está Git y el .bat)
-echo Regresando a la carpeta raiz: %PADRE_DIR%
 cd /d "%PADRE_DIR%"
 
-:: 4. Validar si la carpeta dist NO existe (Fuerza el build inicial)
+:: 3. Validar compilación del frontend principal
 if not exist "%DIST_DIR%" (
-    echo [INFO] No se encontro la carpeta 'dist'. Se procedera con el build inicial...
+    echo [INFO] No se encontro la carpeta 'dist'. Generando build inicial...
     goto EJECUTAR_BUILD
 )
 
-:: 5. Descargar cambios del repositorio y verificar si hubo actualización
-echo.
-echo [1/5] Verificando cambios en Git...
-
+echo [1/4] Verificando cambios en Git...
 set "GIT_OUTPUT="
 for /f "delims=" %%i in ('git pull origin main 2^>^&1') do (
     if not defined GIT_OUTPUT set "GIT_OUTPUT=%%i"
 )
-
 echo Respuesta de Git: %GIT_OUTPUT%
 
-:: Comparamos la respuesta para ver si ya está actualizado
 echo %GIT_OUTPUT% | findstr /C:"Already up to date" >nul
 if %errorlevel% == 0 (
-    echo.
-    echo [INFO] El codigo ya esta actualizado y la carpeta 'dist' existe. Saltando build.
-    goto INICIAR_SERVIDOR
+    echo [INFO] Codigo actualizado. Saltando build.
+    goto INICIAR_SERVICIOS
 )
 
 :EJECUTAR_BUILD
-:: 6. Entrar a la subcarpeta interna del proyecto React
 echo.
-echo [2/5] Entrando a la subcarpeta del proyecto React...
+echo [2/4] Compilando frontend (andoke-macro)...
+if not exist "%REACT_DIR%" (
+    color 0C
+    echo [ERROR] No existe la carpeta %REACT_DIR%
+    pause
+    exit /b
+)
 cd /d "%REACT_DIR%"
-
-:: 7. Verificar e instalar dependencias
-echo.
-echo [3/5] Verificando dependencias de Node...
 call npm install
-
-:: 8. Recompilar el proyecto para PRODUCCIÓN
-echo.
-echo [4/5] Generando compilacion de produccion (Vite Build)...
 call npm run build
 
-:INICIAR_SERVIDOR
-:: 9. Configurar Firewall de Windows
+:INICIAR_SERVICIOS
 echo.
-echo [5/5] Configurando reglas en Firewall de Windows...
-netsh advfirewall firewall show rule name=%NOMBRE_REGLA_HTTP% >nul 2>&1
-if %errorlevel% neq 0 (
-    netsh advfirewall firewall add rule name=%NOMBRE_REGLA_HTTP% dir=in action=allow protocol=TCP localport=%PUERTO_HTTP%
-)
-netsh advfirewall firewall show rule name=%NOMBRE_REGLA_HTTPS% >nul 2>&1
-if %errorlevel% neq 0 (
-    netsh advfirewall firewall add rule name=%NOMBRE_REGLA_HTTPS% dir=in action=allow protocol=TCP localport=%PUERTO_HTTPS%
+echo [3/4] Configurando Firewall de Windows...
+netsh advfirewall firewall add rule name="Intranet HTTP" dir=in action=allow protocol=TCP localport=%PUERTO_HTTP% >nul 2>&1
+netsh advfirewall firewall add rule name="Intranet HTTPS" dir=in action=allow protocol=TCP localport=%PUERTO_HTTPS% >nul 2>&1
+netsh advfirewall firewall add rule name="MQTT TCP Nativo" dir=in action=allow protocol=TCP localport=%PUERTO_MQTT_TCP% >nul 2>&1
+netsh advfirewall firewall add rule name="MQTT WebSockets" dir=in action=allow protocol=TCP localport=%PUERTO_MQTT_WS% >nul 2>&1
+
+:: 4. Levantar el Broker Mosquitto si está instalado
+echo.
+echo [4/4] Verificando e Iniciando Broker MQTT Mosquitto...
+if exist "C:\Program Files\mosquitto\mosquitto.exe" (
+    echo [OK] Iniciando Mosquitto en segundo plano...
+    start "Mosquitto Broker" /b "C:\Program Files\mosquitto\mosquitto.exe" -c "C:\Program Files\mosquitto\mosquitto.conf"
+) else (
+    echo [ADVERTENCIA] Mosquitto no esta instalado en C:\Program Files\mosquitto.
+    echo El subdominio mqtt fallara hasta que lo instales.
 )
 
-:: 10. Servir la carpeta dist con Caddy
+:: 5. Levantar la API si existe un index/servidor Node
+if exist "%API_DIR%\server.js" (
+    echo Iniciando Servidor API Node.js...
+    cd /d "%API_DIR%"
+    start "API Backend" /b node server.js
+)
+
+:: 6. Servir todo con Caddy
 echo.
 echo ===================================================
-echo Intranet lista y sirviendo con Caddy de forma SEGURA.
-echo Apunte los navegadores a: https://andoke.com.co
-echo Mantén esta ventana abierta.
+echo Servidores listos de forma SEGURA con Certificado Comodín:
+echo - App Principal: https://andoke.com.co
+echo - API Gateway:   https://andoke.com.co
+echo - MQTT Broker:   https://andoke.com.co
 echo ===================================================
 echo.
 
-:: Regresar a la raíz donde está caddy.exe y el Caddyfile
 cd /d "%PADRE_DIR%"
-
 if not exist Caddyfile (
     color 0C
-    echo [ERROR CRITICO] No se encontro el archivo Caddyfile en la ruta: %PADRE_DIR%
-    echo Por favor, crea el archivo e intenta de nuevo.
+    echo [ERROR CRITICO] No se encontro el archivo Caddyfile en: %PADRE_DIR%
     pause
     exit /b
 )
 
-:: Ejecutar Caddy (Si falla, la consola se mantendrá abierta para ver el error)
 caddy.exe run --config Caddyfile
 
 echo.
 color 0C
 echo ===================================================
-echo [ALERTA] El servidor Caddy se ha detenido inesperadamente.
-echo Revisa los mensajes de error superiores para diagnosticar.
+echo [ALERTA] Caddy se ha detenido inesperadamente.
 echo ===================================================
 pause
